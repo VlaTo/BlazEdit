@@ -7,6 +7,10 @@ class Editor implements IEditor {
 
     constructor(document: Document) {
         this.document = document;
+        this.document.addEventListener("selectstart", this.onSelectionStart);
+        this.document.addEventListener("selectionchange", this.onSelectionChange);
+        this.document.body.setAttribute("contenteditable", "true");
+        //this.document.body.addEventListener("change", this.onChange);
     }
 
     getContent(): string {
@@ -14,13 +18,7 @@ class Editor implements IEditor {
     }
 
     setContent(content: string): void {
-        this.document.body.setAttribute("contenteditable", "true");
-        this.document.body.addEventListener("change", this.onChange);
         this.document.body.innerHTML = content;
-    }
-
-    private onChange(): void {
-        console.log("[Editor.ts] Editor.onChange");
     }
 
     apply(htmlTag: string): void {
@@ -36,5 +34,13 @@ class Editor implements IEditor {
         } else {
             ;
         }
+    }
+
+    private onSelectionStart(): void {
+        console.log("[Editor.ts] Editor.onSelectionStart");
+    }
+
+    private onSelectionChange(): void {
+        console.log("[Editor.ts] Editor.onSelectionChange");
     }
 }

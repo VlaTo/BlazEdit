@@ -54,6 +54,8 @@ namespace LibraProgramming.BlazEdit.Components
 
         protected string EditorElementId => generatedElementId;
 
+        protected ElementReference Temp1;
+
         public EditorComponent()
         {
             generatedElementId = IdManager.Instance.Generate("editor-area");
@@ -83,7 +85,7 @@ namespace LibraProgramming.BlazEdit.Components
             await base.OnInitializedAsync();
 
             editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
-            editorContext = new EditorContext(MessageAggregator, editorInterop);
+            editorContext = new EditorContext(Temp1, MessageAggregator, editorInterop);
 
             subscription = MessageAggregator.Subscribe(this);
         }
@@ -136,6 +138,7 @@ namespace LibraProgramming.BlazEdit.Components
         /// </summary>
         private class EditorContext : IEditorContext
         {
+            private readonly ElementReference editorElement;
             private readonly IMessageAggregator messageAggregator;
             private readonly IEditorJSInterop editorInterop;
             private readonly Dictionary<IToolCommand, bool> commands;
@@ -145,8 +148,9 @@ namespace LibraProgramming.BlazEdit.Components
 
             public IToolCommand MakeItalic { get; }
 
-            public EditorContext(IMessageAggregator messageAggregator, IEditorJSInterop editorInterop)
+            public EditorContext(ElementReference editorElement, IMessageAggregator messageAggregator, IEditorJSInterop editorInterop)
             {
+                this.editorElement = editorElement;
                 this.messageAggregator = messageAggregator;
                 this.editorInterop = editorInterop;
                 
@@ -163,25 +167,21 @@ namespace LibraProgramming.BlazEdit.Components
 
             public async Task SetContentAsync(string content)
             {
-                if (false == initialized)
-                {
-                    initialized = true;
-                    await editorInterop.InitializeEditorAsync();
-                }
-
+                await EnsureInitializedAsync();
                 await editorInterop.SetContent(content);
             }
 
-            /*public void SetCommand(IToolCommand command, bool enabled)
+            private Task EnsureInitializedAsync()
             {
-                commands[command] = enabled;
-                component.UpdateCommand(command);
-            }
+                if (initialized)
+                {
+                    return Task.CompletedTask;
+                }
 
-            public bool GetCommand(IToolCommand command)
-            {
-                return commands[command];
-            }*/
+                initialized = true;
+
+                return editorInterop.InitializeEditorAsync().AsTask();
+            }
 
             private Task DoMakeBoldAsync()
             {
