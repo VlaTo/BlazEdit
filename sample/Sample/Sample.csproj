@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+    <None Include="wwwroot\css\open-iconic\FONT-LICENSE" />
+    <None Include="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
+    <None Include="wwwroot\css\open-iconic\ICON-LICENSE" />
+    <None Include="wwwroot\css\open-iconic\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.0.0-preview9.19465.2" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.0.0-preview9.19465.2" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.0.0-preview9.19465.2" />
