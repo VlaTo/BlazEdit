@@ -1,0 +1,13 @@
+[
+  {
+    "inputFile": "Less/Editor.less",
+    "outputFile": "content/editor.css",
+    "includeInProject": true,
+    "minify": {
+      "enabled": false
+    },
+    "options": {
+      "sourceMap": false 
+    } 
+  }
+]

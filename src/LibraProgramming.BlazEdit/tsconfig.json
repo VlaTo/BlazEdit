@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "outFile": "content/editor.js",
+    "sourceMap": false,
+    "target": "es5"
+  },
+  "include": [
+    "Scripts/**/*"
+  ],
+  "exclude": [
+    "**/*.spec.ts"
+  ]
+}
