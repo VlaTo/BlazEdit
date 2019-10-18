@@ -14,10 +14,11 @@ namespace LibraProgramming.BlazEdit.Components
     {
         private readonly string generatedElementId;
         private IEditorJSInterop editorInterop;
-        private EditorContext editorContext;
+        //private EditorContext editorContext;
         private ITimeout timeout;
         private bool hasRendered;
         private IDisposable subscription;
+        private bool initialized;
 
         [Inject]
         public IJSRuntime JsRuntime
@@ -46,9 +47,15 @@ namespace LibraProgramming.BlazEdit.Components
         [Parameter]
         public EventCallback<string> TextChanged { get; set; }
 
-        protected IToolCommand MakeBold => editorContext.MakeBold;
+        protected IToolCommand MakeBold
+        {
+            get; 
+        }
 
-        protected IToolCommand MakeItalic => editorContext.MakeItalic;
+        protected IToolCommand MakeItalic
+        {
+            get;
+        }
 
         protected object[] Paragraphs { get; }
 
@@ -59,6 +66,9 @@ namespace LibraProgramming.BlazEdit.Components
         public EditorComponent()
         {
             generatedElementId = IdManager.Instance.Generate("editor-area");
+
+            MakeBold = new ToolCommand(DoMakeBoldAsync, () => true);
+            MakeItalic = new ToolCommand(DoMakeItalicAsync, () => true);
 
             Paragraphs = new []
             {
@@ -85,7 +95,7 @@ namespace LibraProgramming.BlazEdit.Components
             await base.OnInitializedAsync();
 
             editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
-            editorContext = new EditorContext(Temp1, MessageAggregator, editorInterop);
+            //editorContext = new EditorContext(Temp1, MessageAggregator, editorInterop);
 
             subscription = MessageAggregator.Subscribe(this);
         }
@@ -111,18 +121,31 @@ namespace LibraProgramming.BlazEdit.Components
             }
         }
 
-        protected async Task UpdateText(string value)
+        /*protected async Task UpdateText(string value)
         {
             Text = value;
             await TextChanged.InvokeAsync(value);
-        }
+        }*/
 
-        private void UpdateCommand(IToolCommand command)
+        /*private void UpdateCommand(IToolCommand command)
         {
             MessageAggregator.Publish(new CommandMessage(command));
+        }*/
+
+        // https://github.com/cloudcrate/BlazorStorage/blob/master/src/Storage.cs
+        private Task EnsureInitializedAsync()
+        {
+            if (initialized)
+            {
+                return Task.CompletedTask;
+            }
+
+            initialized = true;
+
+            return editorInterop.InitializeEditorAsync().AsTask();
         }
 
-        private Task DoAssignContent()
+        private async Task DoAssignContent()
         {
             if (null != timeout)
             {
@@ -130,13 +153,25 @@ namespace LibraProgramming.BlazEdit.Components
                 timeout = null;
             }
 
-            return editorContext.SetContentAsync(Text);
+            await EnsureInitializedAsync();
+            await editorInterop.SetContent(Text);
+        }
+
+        private Task DoMakeBoldAsync()
+        {
+            return editorInterop.Apply("strong").AsTask();
+        }
+
+        private async Task DoMakeItalicAsync()
+        {
+            Debug.WriteLine("EditorComponent.DoMakeItalic");
+            await Task.CompletedTask;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private class EditorContext : IEditorContext
+        /*private class EditorContext : IEditorContext
         {
             private readonly ElementReference editorElement;
             private readonly IMessageAggregator messageAggregator;
@@ -203,6 +238,6 @@ namespace LibraProgramming.BlazEdit.Components
             {
                 return true;
             }
-        }
+        }*/
     }
 }

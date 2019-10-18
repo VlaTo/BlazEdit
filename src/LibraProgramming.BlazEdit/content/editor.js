@@ -2,20 +2,35 @@
 //
 //
 var Editor = /** @class */ (function () {
-    function Editor(document) {
+    function Editor(document, instance) {
         this.document = document;
-    }
-    Editor.prototype.getContent = function () {
-        return this.document.body.innerHTML;
-    };
-    Editor.prototype.setContent = function (content) {
+        this.instance = instance;
+        this.document.addEventListener("selectstart", this.onSelectionStart);
+        this.document.addEventListener("selectionchange", this.onSelectionChange);
         this.document.body.setAttribute("contenteditable", "true");
-        this.document.body.addEventListener("change", this.onChange);
+        //this.document.body.addEventListener("change", this.onChange);
+    }
+    Object.defineProperty(Editor.prototype, "content", {
+        /**
+         * @prop {string} [content] gets or sets content for editing.
+         * @returns {string}
+         */
+        get: function () {
+            return this.document.body.innerHTML;
+        },
+        set: function (value) {
+            this.document.body.innerHTML = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /*getContent(): string {
+        return this.document.body.innerHTML;
+    }
+
+    setContent(content: string): void {
         this.document.body.innerHTML = content;
-    };
-    Editor.prototype.onChange = function () {
-        console.log("[Editor.ts] Editor.onChange");
-    };
+    }*/
     Editor.prototype.apply = function (htmlTag) {
         var selection = this.document.getSelection();
         if (0 < selection.rangeCount) {
@@ -29,6 +44,13 @@ var Editor = /** @class */ (function () {
             ;
         }
     };
+    Editor.prototype.onSelectionStart = function () {
+        console.log("[Editor.ts] Editor.onSelectionStart");
+        this.instance.invokeMethodAsync("OnSelectionStart");
+    };
+    Editor.prototype.onSelectionChange = function () {
+        console.log("[Editor.ts] Editor.onSelectionChange");
+    };
     return Editor;
 }());
 //
@@ -37,11 +59,11 @@ var Editor = /** @class */ (function () {
 //
 //
 //
-window.editor = function (elementId) {
+window.editor = function (elementId, instance) {
     var element = document.getElementById(elementId);
     if (!element) {
         return;
     }
     var doc = element.contentDocument || element.contentWindow.document;
-    window.editor = new Editor(doc);
+    window.editor = new Editor(doc, instance);
 };

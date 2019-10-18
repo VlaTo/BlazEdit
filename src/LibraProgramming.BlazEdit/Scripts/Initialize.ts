@@ -2,7 +2,7 @@
 //
 //
 
-(window as any).editor = (elementId: string) => {
+(window as any).editor = (elementId: string, instance: any) => {
     const element = document.getElementById(elementId) as HTMLIFrameElement;
 
     if (!element) {
@@ -11,5 +11,5 @@
 
     const doc = element.contentDocument || element.contentWindow.document;
 
-    (window as any).editor = new Editor(doc);
+    (window as any).editor = new Editor(doc, instance);
 };

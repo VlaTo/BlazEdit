@@ -3,9 +3,8 @@
 //
 
 interface IEditor {
-    getContent(): string;
 
-    setContent(content: string): void;
+    content: string;
 
     apply(html: string): void;
 }

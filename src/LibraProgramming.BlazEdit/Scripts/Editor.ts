@@ -3,23 +3,37 @@
 //
 
 class Editor implements IEditor {
-    document: Document;
+    private document: Document;
+    private instance: any;
+    
+    /**
+     * @prop {string} [content] gets or sets content for editing.
+     * @returns {string} 
+     */
+    get content(): string {
+         return this.document.body.innerHTML;
+    }
 
-    constructor(document: Document) {
+    set content(value: string) {
+        this.document.body.innerHTML = value;
+    }
+
+    constructor(document: Document, instance: any) {
         this.document = document;
+        this.instance = instance;
         this.document.addEventListener("selectstart", this.onSelectionStart);
         this.document.addEventListener("selectionchange", this.onSelectionChange);
         this.document.body.setAttribute("contenteditable", "true");
         //this.document.body.addEventListener("change", this.onChange);
     }
 
-    getContent(): string {
+    /*getContent(): string {
         return this.document.body.innerHTML;
     }
 
     setContent(content: string): void {
         this.document.body.innerHTML = content;
-    }
+    }*/
 
     apply(htmlTag: string): void {
         const selection = this.document.getSelection();
@@ -38,6 +52,7 @@ class Editor implements IEditor {
 
     private onSelectionStart(): void {
         console.log("[Editor.ts] Editor.onSelectionStart");
+        this.instance.invokeMethodAsync("OnSelectionStart");
     }
 
     private onSelectionChange(): void {
