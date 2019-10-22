@@ -5,19 +5,22 @@ using System.Threading.Tasks;
 using LibraProgramming.BlazEdit.Commands;
 using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.Events;
+using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace LibraProgramming.BlazEdit.Components
 {
-    public class EditorComponent : ComponentBase, IMessageHandler<RequireSelectionMessage>, IDisposable
+    public class EditorComponent : ComponentBase, IEditorContext, IMessageHandler<RequireSelectionMessage>, IDisposable
     {
         private readonly string generatedElementId;
-        private IEditorJSInterop editorInterop;
+        private readonly BoldToolCommand boldCommand;
+        private EditorJsInterop editorInterop;
         //private EditorContext editorContext;
         private ITimeout timeout;
         private bool hasRendered;
-        private IDisposable subscription;
+        //private IDisposable subscription;
+        private IDisposable disposable;
         private bool initialized;
 
         [Inject]
@@ -47,10 +50,7 @@ namespace LibraProgramming.BlazEdit.Components
         [Parameter]
         public EventCallback<string> TextChanged { get; set; }
 
-        protected IToolCommand MakeBold
-        {
-            get; 
-        }
+        protected IToolCommand MakeBold => boldCommand;
 
         protected IToolCommand MakeItalic
         {
@@ -67,7 +67,7 @@ namespace LibraProgramming.BlazEdit.Components
         {
             generatedElementId = IdManager.Instance.Generate("editor-area");
 
-            MakeBold = new ToolCommand(DoMakeBoldAsync, () => true);
+            boldCommand = new BoldToolCommand(this);
             MakeItalic = new ToolCommand(DoMakeItalicAsync, () => true);
 
             Paragraphs = new []
@@ -81,7 +81,7 @@ namespace LibraProgramming.BlazEdit.Components
 
         public void Dispose()
         {
-            subscription.Dispose();
+            disposable.Dispose();
         }
 
         Task IMessageHandler<RequireSelectionMessage>.HandleAsync(RequireSelectionMessage message)
@@ -95,9 +95,11 @@ namespace LibraProgramming.BlazEdit.Components
             await base.OnInitializedAsync();
 
             editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
-            //editorContext = new EditorContext(Temp1, MessageAggregator, editorInterop);
-
-            subscription = MessageAggregator.Subscribe(this);
+            disposable = new CompositeDisposable(
+                editorInterop.Subscribe(SelectionObserver.Create(OnSelectionStart, OnSelectionChange)),
+                MessageAggregator.Subscribe(this),
+                MessageAggregator.Subscribe(boldCommand)
+            );
         }
 
         protected override async Task OnParametersSetAsync()
@@ -133,16 +135,16 @@ namespace LibraProgramming.BlazEdit.Components
         }*/
 
         // https://github.com/cloudcrate/BlazorStorage/blob/master/src/Storage.cs
-        private Task EnsureInitializedAsync()
+        private async Task EnsureInitializedAsync()
         {
             if (initialized)
             {
-                return Task.CompletedTask;
+                return ;
             }
 
             initialized = true;
 
-            return editorInterop.InitializeEditorAsync().AsTask();
+            await editorInterop.InitializeEditorAsync();
         }
 
         private async Task DoAssignContent()
@@ -166,6 +168,16 @@ namespace LibraProgramming.BlazEdit.Components
         {
             Debug.WriteLine("EditorComponent.DoMakeItalic");
             await Task.CompletedTask;
+        }
+
+        private void OnSelectionStart(SelectionEventArgs e)
+        {
+            Debug.WriteLine("EditorComponent.OnSelectionStart");
+        }
+
+        private void OnSelectionChange(SelectionEventArgs e)
+        {
+            Debug.WriteLine("EditorComponent.OnSelectionChange");
         }
 
         /// <summary>

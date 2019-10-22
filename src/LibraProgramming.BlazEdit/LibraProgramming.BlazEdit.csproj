@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Scripts\IDotNetCallback.ts" />
     <None Remove="Scripts\IEditor.ts" />
     <None Remove="Scripts\Initialize.ts" />
   </ItemGroup>

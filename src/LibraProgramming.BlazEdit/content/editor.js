@@ -1,14 +1,21 @@
-//
-//
-//
+/**
+ * @class Editor
+ *
+ */
 var Editor = /** @class */ (function () {
-    function Editor(document, instance) {
+    /**
+     *
+     * @param {Document} document
+     * @param {any} instance
+     */
+    function Editor(document, callback) {
         this.document = document;
-        this.instance = instance;
-        this.document.addEventListener("selectstart", this.onSelectionStart);
-        this.document.addEventListener("selectionchange", this.onSelectionChange);
+        this.callback = callback;
+        var onSelectionStart = this.onSelectionStart.bind(this);
+        var onSelectionChange = this.onSelectionChange.bind(this);
+        this.document.addEventListener("selectstart", onSelectionStart);
+        this.document.addEventListener("selectionchange", onSelectionChange);
         this.document.body.setAttribute("contenteditable", "true");
-        //this.document.body.addEventListener("change", this.onChange);
     }
     Object.defineProperty(Editor.prototype, "content", {
         /**
@@ -24,13 +31,10 @@ var Editor = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    /*getContent(): string {
-        return this.document.body.innerHTML;
-    }
-
-    setContent(content: string): void {
-        this.document.body.innerHTML = content;
-    }*/
+    /**
+     * Wraps current selection with htmlTag specified.
+     * @param {string} htmlTag
+     */
     Editor.prototype.apply = function (htmlTag) {
         var selection = this.document.getSelection();
         if (0 < selection.rangeCount) {
@@ -44,26 +48,22 @@ var Editor = /** @class */ (function () {
             ;
         }
     };
-    Editor.prototype.onSelectionStart = function () {
-        console.log("[Editor.ts] Editor.onSelectionStart");
-        this.instance.invokeMethodAsync("OnSelectionStart");
+    Editor.prototype.onSelectionStart = function (e) {
+        this.callback.invokeMethodAsync("OnSelectionStart", e);
     };
-    Editor.prototype.onSelectionChange = function () {
-        console.log("[Editor.ts] Editor.onSelectionChange");
+    Editor.prototype.onSelectionChange = function (e) {
+        this.callback.invokeMethodAsync("OnSelectionChange", e);
     };
     return Editor;
 }());
 //
 //
 //
-//
-//
-//
-window.editor = function (elementId, instance) {
+window.editor = function (elementId, callback) {
     var element = document.getElementById(elementId);
     if (!element) {
         return;
     }
     var doc = element.contentDocument || element.contentWindow.document;
-    window.editor = new Editor(doc, instance);
+    window.editor = new Editor(doc, callback);
 };

@@ -1,10 +1,10 @@
-﻿//
-//
-//
-
+﻿/**
+ * @class Editor
+ *
+ */
 class Editor implements IEditor {
     private document: Document;
-    private instance: any;
+    private callback: IDotNetCallback;
     
     /**
      * @prop {string} [content] gets or sets content for editing.
@@ -18,23 +18,28 @@ class Editor implements IEditor {
         this.document.body.innerHTML = value;
     }
 
-    constructor(document: Document, instance: any) {
+    /**
+     * 
+     * @param {Document} document
+     * @param {any} instance
+     */
+    constructor(document: Document, callback: IDotNetCallback) {
         this.document = document;
-        this.instance = instance;
-        this.document.addEventListener("selectstart", this.onSelectionStart);
-        this.document.addEventListener("selectionchange", this.onSelectionChange);
+        this.callback = callback;
+
+        const onSelectionStart = this.onSelectionStart.bind(this);
+        const onSelectionChange = this.onSelectionChange.bind(this);
+
+        this.document.addEventListener("selectstart", onSelectionStart);
+        this.document.addEventListener("selectionchange", onSelectionChange);
+
         this.document.body.setAttribute("contenteditable", "true");
-        //this.document.body.addEventListener("change", this.onChange);
     }
 
-    /*getContent(): string {
-        return this.document.body.innerHTML;
-    }
-
-    setContent(content: string): void {
-        this.document.body.innerHTML = content;
-    }*/
-
+    /**
+     * Wraps current selection with htmlTag specified.
+     * @param {string} htmlTag
+     */
     apply(htmlTag: string): void {
         const selection = this.document.getSelection();
 
@@ -50,12 +55,11 @@ class Editor implements IEditor {
         }
     }
 
-    private onSelectionStart(): void {
-        console.log("[Editor.ts] Editor.onSelectionStart");
-        this.instance.invokeMethodAsync("OnSelectionStart");
+    private onSelectionStart(e: UIEvent): void {
+        this.callback.invokeMethodAsync("OnSelectionStart", e);
     }
 
-    private onSelectionChange(): void {
-        console.log("[Editor.ts] Editor.onSelectionChange");
+    private onSelectionChange(e: UIEvent): void {
+        this.callback.invokeMethodAsync("OnSelectionChange", e);
     }
 }

@@ -1,14 +1,48 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using LibraProgramming.BlazEdit.Components;
+using LibraProgramming.BlazEdit.Extensions;
+using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.JSInterop;
 
 namespace LibraProgramming.BlazEdit.Core
 {
-    public class EditorJsInterop : IEditorJSInterop
+    /// <summary>
+    /// 
+    /// </summary>
+    public class EditorJsInterop : ObservableBase<ISelectionObserver>, IEditorJSInterop
     {
         private readonly IJSRuntime jsRuntime;
         private readonly string elementId;
+
+/*
+        public event EventHandler<SelectionStartEventArgs> SelectionStart
+        {
+            add
+            {
+                if (null == selectionStartHandler)
+                {
+                    var instance = DotNetObjectReference.Create(this);
+                    Debug.WriteLine("EditorJsInterop.SelectionStart subscribe listener");
+                    jsRuntime.InvokeVoidAsync("editor.addSelectionStartListener", instance).RunAndForget();
+                }
+
+                Debug.WriteLine("EditorJsInterop.SelectionStart add event handler");
+
+                selectionStartHandler += value;
+            }
+            remove
+            {
+                selectionStartHandler -= value;
+
+                if (null == selectionStartHandler)
+                {
+                    jsRuntime.InvokeVoidAsync("editor.removeSelectionStartListener").RunAndForget();
+                }
+            }
+        }
+*/
 
         public EditorJsInterop(IJSRuntime jsRuntime, string elementId)
         {
@@ -24,7 +58,8 @@ namespace LibraProgramming.BlazEdit.Core
         public ValueTask InitializeEditorAsync()
         {
             Console.WriteLine("EditorJsInterop.InitializeEditorAsync");
-            return jsRuntime.InvokeVoidAsync("editor", elementId, this);
+            var callback = DotNetObjectReference.Create(this);
+            return jsRuntime.InvokeVoidAsync("editor", elementId, callback);
         }
 
         public ValueTask<string> GetContent()
@@ -44,9 +79,17 @@ namespace LibraProgramming.BlazEdit.Core
         }
 
         [JSInvokable]
-        public void OnSelectionStart()
+        public void OnSelectionStart(EventArgs e)
         {
-            Debug.WriteLine($"[EditorJsInterop.OnSelectionStart]");
+            var eventArgs = new SelectionEventArgs();
+            Raise(observer => observer.OnSelectionStart(eventArgs));
+        }
+
+        [JSInvokable]
+        public void OnSelectionChange(EventArgs e)
+        {
+            var eventArgs = new SelectionEventArgs();
+            Raise(observer => observer.OnSelectionChange(eventArgs));
         }
     }
 }
