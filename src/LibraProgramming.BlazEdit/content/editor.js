@@ -48,6 +48,19 @@ var Editor = /** @class */ (function () {
             ;
         }
     };
+    /**
+     * @param text
+     *
+     */
+    Editor.prototype.setContent = function (text) {
+        this.content = text;
+    };
+    /**
+     *
+     */
+    Editor.prototype.getContent = function () {
+        return this.content;
+    };
     Editor.prototype.onSelectionStart = function (e) {
         this.callback.invokeMethodAsync("OnSelectionStart", e);
     };
@@ -58,6 +71,12 @@ var Editor = /** @class */ (function () {
             for (var index = 0; index < selection.rangeCount; index++) {
                 var range = selection.getRangeAt(index);
                 text = range.toString();
+                var node = range.startContainer;
+                var path = new Array();
+                while (null !== node) {
+                    path.unshift(node.nodeName);
+                    node = node.parentNode;
+                }
             }
         }
         this.callback.invokeMethodAsync("OnSelectionChange", text);

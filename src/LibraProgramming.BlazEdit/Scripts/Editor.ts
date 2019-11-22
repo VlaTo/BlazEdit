@@ -5,13 +5,13 @@
 class Editor implements IEditor {
     private document: Document;
     private callback: IDotNetCallback;
-    
+
     /**
      * @prop {string} [content] gets or sets content for editing.
      * @returns {string} 
      */
     get content(): string {
-         return this.document.body.innerHTML;
+        return this.document.body.innerHTML;
     }
 
     set content(value: string) {
@@ -55,6 +55,21 @@ class Editor implements IEditor {
         }
     }
 
+    /**
+     * @param text
+     *
+     */
+    setContent(text: string): void {
+        this.content = text;
+    }
+
+    /**
+     *
+     */
+    getContent(): string {
+        return this.content;
+    }
+
     private onSelectionStart(e: UIEvent): void {
         this.callback.invokeMethodAsync("OnSelectionStart", e);
     }
@@ -67,6 +82,18 @@ class Editor implements IEditor {
             for (let index = 0; index < selection.rangeCount; index++) {
                 const range = selection.getRangeAt(index);
                 text = range.toString();
+
+                let node = range.startContainer;
+                //let path = new Array<INode>();
+                let temp: INode = null;
+
+                while (null !== node) {
+                    temp = { name: node.nodeName, next: temp };
+                    //path.unshift();
+                    node = node.parentNode;
+                }
+
+
             }
         }
 

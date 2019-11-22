@@ -14,11 +14,9 @@ namespace LibraProgramming.BlazEdit.Components
         private readonly string generatedElementId;
         private readonly BoldToolCommand boldCommand;
         private readonly ItalicToolCommand italicCommand;
-        private EditorJsInterop editorInterop;
-        //private EditorContext editorContext;
+        private IEditorJSInterop editor;
         private ITimeout timeout;
         private bool hasRendered;
-        //private IDisposable subscription;
         private IDisposable disposable;
         private bool initialized;
 
@@ -97,26 +95,19 @@ namespace LibraProgramming.BlazEdit.Components
             disposable.Dispose();
         }
 
-        /*bool IEditorContext.CanInvokeCommand(IToolCommand command)
-        {
-            return true;
-        }*/
-
         Task IMessageHandler<SelectionChangedMessage>.HandleAsync(SelectionChangedMessage message)
         {
             return Task.CompletedTask;
         }
 
-        Task IEditorContext.FormatSelectionAsync()
-        {
-            return editorInterop.FormatSelection("strong").AsTask();
-        }
+        Task IEditorContext.FormatSelectionAsync(SelectionFormat format) => editor.FormatSelectionAsync(format);
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
-            editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
+            var editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
+
             disposable = new CompositeDisposable(
                 editorInterop.Subscribe(SelectionObserver.Create(
                     e =>
@@ -133,6 +124,8 @@ namespace LibraProgramming.BlazEdit.Components
                 MessageDispatcher.Subscribe(boldCommand),
                 MessageDispatcher.Subscribe(italicCommand)
             );
+
+            editor = editorInterop;
         }
 
         protected override async Task OnParametersSetAsync()
@@ -156,17 +149,6 @@ namespace LibraProgramming.BlazEdit.Components
             }
         }
 
-        /*protected async Task UpdateText(string value)
-        {
-            Text = value;
-            await TextChanged.InvokeAsync(value);
-        }*/
-
-        /*private void UpdateCommand(IToolCommand command)
-        {
-            MessageAggregator.Publish(new CommandMessage(command));
-        }*/
-
         // https://github.com/cloudcrate/BlazorStorage/blob/master/src/Storage.cs
         private async Task EnsureInitializedAsync()
         {
@@ -177,7 +159,7 @@ namespace LibraProgramming.BlazEdit.Components
 
             initialized = true;
 
-            await editorInterop.InitializeEditorAsync();
+            await editor.InitializeEditorAsync();
         }
 
         private async Task DoAssignContent()
@@ -189,79 +171,7 @@ namespace LibraProgramming.BlazEdit.Components
             }
 
             await EnsureInitializedAsync();
-            await editorInterop.SetContent(Text);
+            await editor.SetContentAsync(Text);
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /*private class EditorContext : IEditorContext
-        {
-            private readonly ElementReference editorElement;
-            private readonly IMessageAggregator messageAggregator;
-            private readonly IEditorJSInterop editorInterop;
-            private readonly Dictionary<IToolCommand, bool> commands;
-            private bool initialized;
-
-            public IToolCommand MakeBold { get; }
-
-            public IToolCommand MakeItalic { get; }
-
-            public EditorContext(ElementReference editorElement, IMessageAggregator messageAggregator, IEditorJSInterop editorInterop)
-            {
-                this.editorElement = editorElement;
-                this.messageAggregator = messageAggregator;
-                this.editorInterop = editorInterop;
-                
-                commands = new Dictionary<IToolCommand, bool>();
-
-                MakeBold = new ToolCommand(DoMakeBoldAsync, CanMakeBold);
-                MakeItalic = new ToolCommand(DoMakeItalicAsync, CanMakeItalic);
-            }
-
-            public async Task<string> GetContent()
-            {
-                return await editorInterop.GetContent();
-            }
-
-            public async Task SetContentAsync(string content)
-            {
-                await EnsureInitializedAsync();
-                await editorInterop.SetContent(content);
-            }
-
-            private Task EnsureInitializedAsync()
-            {
-                if (initialized)
-                {
-                    return Task.CompletedTask;
-                }
-
-                initialized = true;
-
-                return editorInterop.InitializeEditorAsync().AsTask();
-            }
-
-            private Task DoMakeBoldAsync()
-            {
-                return editorInterop.Apply("strong").AsTask();
-            }
-
-            private async Task DoMakeItalicAsync()
-            {
-                Debug.WriteLine("EditorComponent.DoMakeItalic");
-                await Task.CompletedTask;
-            }
-
-            private bool CanMakeBold()
-            {
-                return true;
-            }
-
-            private bool CanMakeItalic()
-            {
-                return true;
-            }
-        }*/
     }
 }

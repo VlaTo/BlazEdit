@@ -20,7 +20,8 @@ namespace LibraProgramming.BlazEdit.Commands
 
         public override Task InvokeAsync()
         {
-            return EditorContext.FormatSelectionAsync();
+            var format = new SelectionFormat("strong");
+            return EditorContext.FormatSelectionAsync(format);
         }
 
         protected override Task DoSelectionChangedAsync(Selection selection)

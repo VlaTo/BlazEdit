@@ -15,4 +15,21 @@ interface IEditor {
      *
      */
     formatSelection(format: ISelectionFormat): void;
+
+    /**
+     * @param {string} text
+     *
+     */
+    setContent(text: string): void;
+
+    /**
+     * @return {string}
+     *
+     */
+    getContent(): string;
+}
+
+interface INode {
+    name: string;
+    next: INode;
 }
