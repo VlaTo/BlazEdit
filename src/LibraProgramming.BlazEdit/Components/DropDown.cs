@@ -77,7 +77,7 @@ namespace LibraProgramming.BlazEdit.Components
         }
 
         [Inject]
-        public IMessageAggregator MessageAggregator
+        public IMessageDispatcher MessageDispatcher
         {
             get;
             set;
@@ -152,7 +152,7 @@ namespace LibraProgramming.BlazEdit.Components
         {
             base.OnInitialized();
 
-            subscription = MessageAggregator.Subscribe(this);
+            subscription = MessageDispatcher.Subscribe(this);
 
             UpdateClassString();
         }
@@ -243,7 +243,7 @@ namespace LibraProgramming.BlazEdit.Components
                     selectionItems.Add(new KeyValuePair<string, object>(title, value));
                 }
                 
-                MessageAggregator.Publish(new RequireSelectionMessage(selectionItems.ToArray()));
+                MessageDispatcher.Publish(new RequireSelectionMessage(selectionItems.ToArray()));
             }
             else
             {

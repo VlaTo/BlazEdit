@@ -5,7 +5,7 @@ namespace LibraProgramming.BlazEdit.Core
     /// <summary>
     /// 
     /// </summary>
-    public interface IMessageAggregator
+    public interface IMessageDispatcher
     {
         /// <summary>
         /// 

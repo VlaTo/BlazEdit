@@ -4,14 +4,14 @@ namespace LibraProgramming.BlazEdit.Events
 {
     public class SelectionChangedMessage : IMessage
     {
-        public string Text
+        public Selection Selection
         {
             get;
         }
 
-        public SelectionChangedMessage(string text)
+        public SelectionChangedMessage(Selection selection)
         {
-            Text = text;
+            Selection = selection;
         }
     }
 }

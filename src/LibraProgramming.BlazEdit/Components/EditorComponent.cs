@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using LibraProgramming.BlazEdit.Commands;
+﻿using LibraProgramming.BlazEdit.Commands;
 using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.Events;
 using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Components
 {
-    public class EditorComponent : ComponentBase, IEditorContext, IMessageHandler<RequireSelectionMessage>, IDisposable
+    public class EditorComponent : ComponentBase, IEditorContext, IMessageHandler<SelectionChangedMessage>, IDisposable
     {
         private readonly string generatedElementId;
         private readonly BoldToolCommand boldCommand;
+        private readonly ItalicToolCommand italicCommand;
         private EditorJsInterop editorInterop;
         //private EditorContext editorContext;
         private ITimeout timeout;
@@ -31,7 +30,7 @@ namespace LibraProgramming.BlazEdit.Components
         }
 
         [Inject]
-        public IMessageAggregator MessageAggregator
+        public IMessageDispatcher MessageDispatcher
         {
             get; 
             set;
@@ -45,19 +44,33 @@ namespace LibraProgramming.BlazEdit.Components
         }
 
         [Parameter]
-        public string Text { get; set; }
+        public string Text
+        {
+            get; 
+            set;
+        }
 
         [Parameter]
-        public EventCallback<string> TextChanged { get; set; }
+        public EventCallback<string> TextChanged
+        {
+            get; 
+            set;
+        }
 
-        protected IToolCommand MakeBold => boldCommand;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected IToolCommand BoldCommand => boldCommand;
 
-        protected IToolCommand MakeItalic
+        /// <summary>
+        /// 
+        /// </summary>
+        protected IToolCommand ItalicCommand => italicCommand;
+
+        protected object[] Paragraphs
         {
             get;
         }
-
-        protected object[] Paragraphs { get; }
 
         protected string EditorElementId => generatedElementId;
 
@@ -68,7 +81,7 @@ namespace LibraProgramming.BlazEdit.Components
             generatedElementId = IdManager.Instance.Generate("editor-area");
 
             boldCommand = new BoldToolCommand(this);
-            MakeItalic = new ToolCommand(DoMakeItalicAsync, () => true);
+            italicCommand = new ItalicToolCommand(this);
 
             Paragraphs = new []
             {
@@ -84,10 +97,19 @@ namespace LibraProgramming.BlazEdit.Components
             disposable.Dispose();
         }
 
-        Task IMessageHandler<RequireSelectionMessage>.HandleAsync(RequireSelectionMessage message)
+        /*bool IEditorContext.CanInvokeCommand(IToolCommand command)
         {
-            Text = "<p>Sample text</p>";
-            return TextChanged.InvokeAsync(Text);
+            return true;
+        }*/
+
+        Task IMessageHandler<SelectionChangedMessage>.HandleAsync(SelectionChangedMessage message)
+        {
+            return Task.CompletedTask;
+        }
+
+        Task IEditorContext.FormatSelectionAsync()
+        {
+            return editorInterop.FormatSelection("strong").AsTask();
         }
 
         protected override async Task OnInitializedAsync()
@@ -96,9 +118,20 @@ namespace LibraProgramming.BlazEdit.Components
 
             editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
             disposable = new CompositeDisposable(
-                editorInterop.Subscribe(SelectionObserver.Create(OnSelectionStart, OnSelectionChange)),
-                MessageAggregator.Subscribe(this),
-                MessageAggregator.Subscribe(boldCommand)
+                editorInterop.Subscribe(SelectionObserver.Create(
+                    e =>
+                    {
+                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.Empty));
+                    },
+                    e =>
+                    {
+                        var selection = new Selection(e.Text);
+                        MessageDispatcher.Publish(new SelectionChangedMessage(selection));
+                    })
+                ),
+                MessageDispatcher.Subscribe(this),
+                MessageDispatcher.Subscribe(boldCommand),
+                MessageDispatcher.Subscribe(italicCommand)
             );
         }
 
@@ -157,27 +190,6 @@ namespace LibraProgramming.BlazEdit.Components
 
             await EnsureInitializedAsync();
             await editorInterop.SetContent(Text);
-        }
-
-        private Task DoMakeBoldAsync()
-        {
-            return editorInterop.Apply("strong").AsTask();
-        }
-
-        private async Task DoMakeItalicAsync()
-        {
-            Debug.WriteLine("EditorComponent.DoMakeItalic");
-            await Task.CompletedTask;
-        }
-
-        private void OnSelectionStart(SelectionEventArgs e)
-        {
-            Debug.WriteLine("EditorComponent.OnSelectionStart");
-        }
-
-        private void OnSelectionChange(SelectionEventArgs e)
-        {
-            Debug.WriteLine("EditorComponent.OnSelectionChange");
         }
 
         /// <summary>

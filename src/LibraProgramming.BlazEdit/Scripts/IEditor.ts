@@ -11,8 +11,8 @@ interface IEditor {
     content: string;
 
     /**
-     * @param {string} html
+     * @param {ISelectionFormat} format
      *
      */
-    apply(html: string): void;
+    formatSelection(format: ISelectionFormat): void;
 }

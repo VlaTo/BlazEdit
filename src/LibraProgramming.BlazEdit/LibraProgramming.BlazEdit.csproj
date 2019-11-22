@@ -20,6 +20,7 @@
     <None Remove="Scripts\IDotNetCallback.ts" />
     <None Remove="Scripts\IEditor.ts" />
     <None Remove="Scripts\Initialize.ts" />
+    <None Remove="Scripts\ISelectionFormat.ts" />
   </ItemGroup>
 
   <ItemGroup>

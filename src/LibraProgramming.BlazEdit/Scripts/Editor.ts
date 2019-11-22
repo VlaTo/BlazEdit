@@ -38,15 +38,15 @@ class Editor implements IEditor {
 
     /**
      * Wraps current selection with htmlTag specified.
-     * @param {string} htmlTag
+     * @param {ISelectionFormat} format
      */
-    apply(htmlTag: string): void {
+    formatSelection(format: ISelectionFormat): void {
         const selection = this.document.getSelection();
 
         if (0 < selection.rangeCount) {
             for (let index = 0; index < selection.rangeCount; index++) {
                 const range = selection.getRangeAt(index);
-                const element = this.document.createElement(htmlTag);
+                const element = this.document.createElement(format.elementName);
 
                 range.surroundContents(element);
             }
@@ -60,6 +60,16 @@ class Editor implements IEditor {
     }
 
     private onSelectionChange(e: UIEvent): void {
-        this.callback.invokeMethodAsync("OnSelectionChange", e);
+        const selection = this.document.getSelection();
+        let text = "";
+
+        if (0 < selection.rangeCount) {
+            for (let index = 0; index < selection.rangeCount; index++) {
+                const range = selection.getRangeAt(index);
+                text = range.toString();
+            }
+        }
+
+        this.callback.invokeMethodAsync("OnSelectionChange", text);
     }
 }

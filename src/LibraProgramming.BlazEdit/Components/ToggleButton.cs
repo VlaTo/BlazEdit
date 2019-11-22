@@ -56,7 +56,7 @@ namespace LibraProgramming.BlazEdit.Components
 
             if (false == String.IsNullOrEmpty(GroupName))
             {
-                MessageAggregator.Publish(new ToggleButtonMessage(this));
+                MessageDispatcher.Publish(new ToggleButtonMessage(this));
             }
         }
     }

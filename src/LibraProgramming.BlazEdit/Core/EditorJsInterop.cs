@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading.Tasks;
 using LibraProgramming.BlazEdit.Components;
 using LibraProgramming.BlazEdit.Extensions;
@@ -73,23 +74,37 @@ namespace LibraProgramming.BlazEdit.Core
             return jsRuntime.InvokeVoidAsync("editor.content", content);
         }
 
-        public ValueTask Apply(string htmlTag)
+        public ValueTask FormatSelection(string htmlTag)
         {
-            return jsRuntime.InvokeVoidAsync("editor.apply", htmlTag);
+            var format = new SelectionFormat("strong");
+            return jsRuntime.InvokeVoidAsync("editor.formatSelection", format);
         }
 
         [JSInvokable]
-        public void OnSelectionStart(EventArgs e)
+        public void OnSelectionStart(JsonElement e)
         {
-            var eventArgs = new SelectionEventArgs();
+            var eventArgs = new SelectionEventArgs(String.Empty);
             Raise(observer => observer.OnSelectionStart(eventArgs));
         }
 
         [JSInvokable]
-        public void OnSelectionChange(EventArgs e)
+        public void OnSelectionChange(string text)
         {
-            var eventArgs = new SelectionEventArgs();
+            var eventArgs = new SelectionEventArgs(text);
             Raise(observer => observer.OnSelectionChange(eventArgs));
+        }
+
+        internal sealed class SelectionFormat
+        {
+            public string elementName
+            {
+                get;
+            }
+
+            public SelectionFormat(string elementName)
+            {
+                this.elementName = elementName;
+            }
         }
     }
 }

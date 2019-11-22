@@ -14,7 +14,7 @@ namespace Sample
                 {
                     services
                         .AddSingleton<ITimeoutManager, TimeoutManager>()
-                        .AddSingleton<IMessageAggregator, MessageAggregator>();
+                        .AddSingleton<IMessageDispatcher, MessageDispatcher>();
                 })
                 .UseBlazorStartup<Startup>()
                 .Build();

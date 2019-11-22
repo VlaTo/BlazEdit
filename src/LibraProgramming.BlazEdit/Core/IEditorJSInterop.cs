@@ -13,6 +13,6 @@ namespace LibraProgramming.BlazEdit.Core
 
         ValueTask SetContent(string content);
 
-        ValueTask Apply(string htmlTag);
+        ValueTask FormatSelection(string htmlTag);
     }
 }

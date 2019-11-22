@@ -33,14 +33,14 @@ var Editor = /** @class */ (function () {
     });
     /**
      * Wraps current selection with htmlTag specified.
-     * @param {string} htmlTag
+     * @param {ISelectionFormat} format
      */
-    Editor.prototype.apply = function (htmlTag) {
+    Editor.prototype.formatSelection = function (format) {
         var selection = this.document.getSelection();
         if (0 < selection.rangeCount) {
             for (var index = 0; index < selection.rangeCount; index++) {
                 var range = selection.getRangeAt(index);
-                var element = this.document.createElement(htmlTag);
+                var element = this.document.createElement(format.elementName);
                 range.surroundContents(element);
             }
         }
@@ -52,7 +52,15 @@ var Editor = /** @class */ (function () {
         this.callback.invokeMethodAsync("OnSelectionStart", e);
     };
     Editor.prototype.onSelectionChange = function (e) {
-        this.callback.invokeMethodAsync("OnSelectionChange", e);
+        var selection = this.document.getSelection();
+        var text = "";
+        if (0 < selection.rangeCount) {
+            for (var index = 0; index < selection.rangeCount; index++) {
+                var range = selection.getRangeAt(index);
+                text = range.toString();
+            }
+        }
+        this.callback.invokeMethodAsync("OnSelectionChange", text);
     };
     return Editor;
 }());

@@ -1,4 +1,5 @@
-﻿using LibraProgramming.BlazEdit.Commands;
+﻿using System.Threading.Tasks;
+using LibraProgramming.BlazEdit.Commands;
 
 namespace LibraProgramming.BlazEdit.Core
 {
@@ -7,6 +8,8 @@ namespace LibraProgramming.BlazEdit.Core
     /// </summary>
     public interface IEditorContext
     {
-        bool CanInvokeCommand(IToolCommand command);
+        //bool CanInvokeCommand(IToolCommand command);
+
+        Task FormatSelectionAsync();
     }
 }

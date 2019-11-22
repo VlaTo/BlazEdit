@@ -1,14 +1,12 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using LibraProgramming.BlazEdit.Core;
-using LibraProgramming.BlazEdit.Events;
 
 namespace LibraProgramming.BlazEdit.Commands
 {
-    internal sealed class BoldToolCommand : FormatToolCommand
+    internal sealed class ItalicToolCommand : FormatToolCommand
     {
-        public BoldToolCommand(IEditorContext editorContext)
+        public ItalicToolCommand(IEditorContext editorContext)
             : base(editorContext)
         {
         }
@@ -25,7 +23,7 @@ namespace LibraProgramming.BlazEdit.Commands
 
         protected override Task DoSelectionChangedAsync(Selection selection)
         {
-            Debug.WriteLine($"[{nameof(BoldToolCommand)}.DoSelectionChangedAsync] Selection: {selection.GetSelectionText()}");
+            Debug.WriteLine($"[{nameof(ItalicToolCommand)}.DoSelectionChangedAsync] Selection: {selection.GetSelectionText()}");
             return base.DoSelectionChangedAsync(selection);
         }
     }

@@ -1,18 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using LibraProgramming.BlazEdit.Core;
+﻿using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.Events;
+using System;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Commands
 {
     internal abstract class FormatToolCommand : IToolCommand, IMessageHandler<SelectionChangedMessage>
     {
-        protected bool CanBeApplied
-        {
-            get; 
-            private set;
-        }
-
         protected IEditorContext EditorContext
         {
             get;
@@ -23,29 +17,22 @@ namespace LibraProgramming.BlazEdit.Commands
             EditorContext = editorContext;
         }
 
-        public virtual bool CanInvoke()
-        {
-            return CanBeApplied && EditorContext.CanInvokeCommand(this);
-        }
+        public virtual bool CanInvoke() => false;
 
         public abstract Task InvokeAsync();
 
         Task IMessageHandler<SelectionChangedMessage>.HandleAsync(SelectionChangedMessage message)
         {
-            var notEmpty = false == String.IsNullOrEmpty(message.Text);
+            var selection = message.Selection;
 
-            if (notEmpty != CanBeApplied)
+            if (false == String.IsNullOrEmpty(selection.GetSelectionText()))
             {
-                CanBeApplied = notEmpty;
-                return DoSelectionChanged();
+                ;
             }
 
-            return Task.CompletedTask;
+            return DoSelectionChangedAsync(selection);
         }
 
-        protected virtual Task DoSelectionChanged()
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task DoSelectionChangedAsync(Selection selection) => Task.CompletedTask;
     }
 }
