@@ -12,7 +12,7 @@ namespace LibraProgramming.BlazEdit.Components
 {
     public class EditorComponent : ComponentBase, IMessageHandler<RequireSelectionMessage>, IDisposable
     {
-        private readonly string generatedElementId;
+        //private readonly string generatedElementId;
         private IEditorJSInterop editorInterop;
         private EditorContext editorContext;
         private ITimeout timeout;
@@ -52,13 +52,13 @@ namespace LibraProgramming.BlazEdit.Components
 
         protected object[] Paragraphs { get; }
 
-        protected string EditorElementId => generatedElementId;
+        //protected string EditorElementId => generatedElementId;
 
         protected ElementReference Temp1;
 
         public EditorComponent()
         {
-            generatedElementId = IdManager.Instance.Generate("editor-area");
+            //generatedElementId = IdManager.Instance.Generate("editor-area");
 
             Paragraphs = new []
             {
@@ -84,7 +84,7 @@ namespace LibraProgramming.BlazEdit.Components
         {
             await base.OnInitializedAsync();
 
-            editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
+            editorInterop = new EditorJsInterop(JsRuntime, Temp1);
             editorContext = new EditorContext(Temp1, MessageAggregator, editorInterop);
 
             subscription = MessageAggregator.Subscribe(this);

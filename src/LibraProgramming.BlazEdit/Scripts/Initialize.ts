@@ -2,14 +2,14 @@
 //
 //
 
-(window as any).editor = (elementId: string) => {
-    const element = document.getElementById(elementId) as HTMLIFrameElement;
+(window as any).editor = (element: HTMLElement) => {
+    //const host = document.getElementById(elementId) as HTMLIFrameElement;
 
-    if (!element) {
-        return;
+    const temp = document.getElementById(element.id);
+    const host = element as HTMLIFrameElement;
+
+    if (!!host) {
+        const doc = host.contentDocument || host.contentWindow.document;
+        (window as any).editor = new Editor(doc);
     }
-
-    const doc = element.contentDocument || element.contentWindow.document;
-
-    (window as any).editor = new Editor(doc);
 };

@@ -4,17 +4,16 @@
 var Editor = /** @class */ (function () {
     function Editor(document) {
         this.document = document;
+        this.document.addEventListener("selectstart", this.onSelectionStart);
+        this.document.addEventListener("selectionchange", this.onSelectionChange);
+        this.document.body.setAttribute("contenteditable", "true");
+        //this.document.body.addEventListener("change", this.onChange);
     }
     Editor.prototype.getContent = function () {
         return this.document.body.innerHTML;
     };
     Editor.prototype.setContent = function (content) {
-        this.document.body.setAttribute("contenteditable", "true");
-        this.document.body.addEventListener("change", this.onChange);
         this.document.body.innerHTML = content;
-    };
-    Editor.prototype.onChange = function () {
-        console.log("[Editor.ts] Editor.onChange");
     };
     Editor.prototype.apply = function (htmlTag) {
         var selection = this.document.getSelection();
@@ -29,6 +28,12 @@ var Editor = /** @class */ (function () {
             ;
         }
     };
+    Editor.prototype.onSelectionStart = function () {
+        console.log("[Editor.ts] Editor.onSelectionStart");
+    };
+    Editor.prototype.onSelectionChange = function () {
+        console.log("[Editor.ts] Editor.onSelectionChange");
+    };
     return Editor;
 }());
 //
@@ -37,11 +42,12 @@ var Editor = /** @class */ (function () {
 //
 //
 //
-window.editor = function (elementId) {
-    var element = document.getElementById(elementId);
-    if (!element) {
-        return;
+window.editor = function (element) {
+    //const host = document.getElementById(elementId) as HTMLIFrameElement;
+    var temp = document.getElementById(element.id);
+    var host = element;
+    if (!!host) {
+        var doc = host.contentDocument || host.contentWindow.document;
+        window.editor = new Editor(doc);
     }
-    var doc = element.contentDocument || element.contentWindow.document;
-    window.editor = new Editor(doc);
 };
