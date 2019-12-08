@@ -42,7 +42,7 @@ namespace LibraProgramming.BlazEdit.Components
         }
 
         [Inject]
-        public IMessageAggregator MessageAggregator
+        public IMessageDispatcher MessageDispatcher
         {
             get; 
             set;
@@ -106,7 +106,7 @@ namespace LibraProgramming.BlazEdit.Components
         {
             base.OnInitialized();
 
-            subscription = MessageAggregator.Subscribe(this);
+            subscription = MessageDispatcher.Subscribe(this);
 
             UpdateClassString();
         }

@@ -1,4 +1,4 @@
-﻿using LibraProgramming.BlazEdit.Commands;
+﻿using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Core
 {
@@ -7,14 +7,6 @@ namespace LibraProgramming.BlazEdit.Core
     /// </summary>
     public interface IEditorContext
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        IToolCommand MakeBold { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        IToolCommand MakeItalic { get; }
+        Task FormatSelectionAsync(SelectionFormat format);
     }
 }

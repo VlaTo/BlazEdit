@@ -11,7 +11,7 @@ namespace LibraProgramming.BlazEdit.Core
     /// <summary>
     /// 
     /// </summary>
-    public sealed class MessageAggregator : IMessageAggregator
+    public sealed class MessageDispatcher : IMessageDispatcher
     {
         private readonly Dictionary<Type, MessageHandlers> messages;
         private readonly object syncRoot;
@@ -19,13 +19,13 @@ namespace LibraProgramming.BlazEdit.Core
         /// <summary>
         /// 
         /// </summary>
-        public MessageAggregator()
+        public MessageDispatcher()
         {
             syncRoot = new object();
             messages = new Dictionary<Type, MessageHandlers>();
         }
 
-        /// <inheritdoc cref="IMessageAggregator.Publish" />
+        /// <inheritdoc cref="IMessageDispatcher.Publish" />
         public void Publish(IMessage message)
         {
             if (null == message)
@@ -46,7 +46,7 @@ namespace LibraProgramming.BlazEdit.Core
             }
         }
 
-        /// <inheritdoc cref="IMessageAggregator.Subscribe" />
+        /// <inheritdoc cref="IMessageDispatcher.Subscribe" />
         public IDisposable Subscribe(IMessageHandler handler)
         {
             if (null == handler)
@@ -196,18 +196,18 @@ namespace LibraProgramming.BlazEdit.Core
         /// </summary>
         private class Subscription : IDisposable
         {
-            private readonly MessageAggregator aggregator;
+            private readonly MessageDispatcher dispatcher;
             private readonly IMessageHandler handler;
 
-            public Subscription(MessageAggregator aggregator, IMessageHandler handler)
+            public Subscription(MessageDispatcher dispatcher, IMessageHandler handler)
             {
-                this.aggregator = aggregator;
+                this.dispatcher = dispatcher;
                 this.handler = handler;
             }
 
             public void Dispose()
             {
-                aggregator.RemoveHandler(handler);
+                dispatcher.RemoveHandler(handler);
             }
         }
     }

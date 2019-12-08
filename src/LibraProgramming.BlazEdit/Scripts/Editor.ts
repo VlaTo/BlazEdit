@@ -1,33 +1,52 @@
-﻿//
-//
-//
-
+﻿/**
+ * @class Editor
+ *
+ */
 class Editor implements IEditor {
-    document: Document;
+    private document: Document;
+    private callback: IDotNetCallback;
 
-    constructor(document: Document) {
-        this.document = document;
-        this.document.addEventListener("selectstart", this.onSelectionStart);
-        this.document.addEventListener("selectionchange", this.onSelectionChange);
-        this.document.body.setAttribute("contenteditable", "true");
-        //this.document.body.addEventListener("change", this.onChange);
-    }
-
-    getContent(): string {
+    /**
+     * @prop {string} [content] gets or sets content for editing.
+     * @returns {string} 
+     */
+    get content(): string {
         return this.document.body.innerHTML;
     }
 
-    setContent(content: string): void {
-        this.document.body.innerHTML = content;
+    set content(value: string) {
+        this.document.body.innerHTML = value;
     }
 
-    apply(htmlTag: string): void {
+    /**
+     * 
+     * @param {Document} document
+     * @param {any} instance
+     */
+    constructor(document: Document, callback: IDotNetCallback) {
+        this.document = document;
+        this.callback = callback;
+
+        const onSelectionStart = this.onSelectionStart.bind(this);
+        const onSelectionChange = this.onSelectionChange.bind(this);
+
+        this.document.addEventListener("selectstart", onSelectionStart);
+        this.document.addEventListener("selectionchange", onSelectionChange);
+
+        this.document.body.setAttribute("contenteditable", "true");
+    }
+
+    /**
+     * Wraps current selection with htmlTag specified.
+     * @param {ISelectionFormat} format
+     */
+    formatSelection(format: ISelectionFormat): void {
         const selection = this.document.getSelection();
 
         if (0 < selection.rangeCount) {
             for (let index = 0; index < selection.rangeCount; index++) {
                 const range = selection.getRangeAt(index);
-                const element = this.document.createElement(htmlTag);
+                const element = this.document.createElement(format.elementName);
 
                 range.surroundContents(element);
             }
@@ -36,11 +55,48 @@ class Editor implements IEditor {
         }
     }
 
-    private onSelectionStart(): void {
-        console.log("[Editor.ts] Editor.onSelectionStart");
+    /**
+     * @param text
+     *
+     */
+    setContent(text: string): void {
+        this.content = text;
     }
 
-    private onSelectionChange(): void {
-        console.log("[Editor.ts] Editor.onSelectionChange");
+    /**
+     *
+     */
+    getContent(): string {
+        return this.content;
+    }
+
+    private onSelectionStart(e: UIEvent): void {
+        this.callback.invokeMethodAsync("OnSelectionStart", e);
+    }
+
+    private onSelectionChange(e: UIEvent): void {
+        const selection = this.document.getSelection();
+        let text = "";
+
+        if (0 < selection.rangeCount) {
+            for (let index = 0; index < selection.rangeCount; index++) {
+                const range = selection.getRangeAt(index);
+                text = range.toString();
+
+                let node = range.startContainer;
+                //let path = new Array<INode>();
+                let temp: INode = null;
+
+                while (null !== node) {
+                    temp = { name: node.nodeName, next: temp };
+                    //path.unshift();
+                    node = node.parentNode;
+                }
+
+
+            }
+        }
+
+        this.callback.invokeMethodAsync("OnSelectionChange", text);
     }
 }

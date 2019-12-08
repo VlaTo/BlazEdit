@@ -1,17 +1,49 @@
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
+using LibraProgramming.BlazEdit.Components;
+using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.JSInterop;
+using System;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Core
 {
-    public class EditorJsInterop : IEditorJSInterop
+    /// <summary>
+    /// 
+    /// </summary>
+    public class EditorJsInterop : ObservableBase<ISelectionObserver>, IEditorJSInterop
     {
         private readonly IJSRuntime jsRuntime;
         private readonly ElementReference element;
 
-        public EditorJsInterop(IJSRuntime jsRuntime, ElementReference element)
+/*
+        public event EventHandler<SelectionStartEventArgs> SelectionStart
+        {
+            add
+            {
+                if (null == selectionStartHandler)
+                {
+                    var instance = DotNetObjectReference.Create(this);
+                    Debug.WriteLine("EditorJsInterop.SelectionStart subscribe listener");
+                    jsRuntime.InvokeVoidAsync("editor.addSelectionStartListener", instance).RunAndForget();
+                }
+
+                Debug.WriteLine("EditorJsInterop.SelectionStart add event handler");
+
+                selectionStartHandler += value;
+            }
+            remove
+            {
+                selectionStartHandler -= value;
+
+                if (null == selectionStartHandler)
+                {
+                    jsRuntime.InvokeVoidAsync("editor.removeSelectionStartListener").RunAndForget();
+                }
+            }
+        }
+*/
+
+        public EditorJsInterop(IJSRuntime jsRuntime, string elementId)
         {
             if (null == jsRuntime)
             {
@@ -22,26 +54,31 @@ namespace LibraProgramming.BlazEdit.Core
             this.element = element;
         }
 
-        public ValueTask InitializeEditorAsync()
+        public Task InitializeEditorAsync()
         {
             Console.WriteLine("EditorJsInterop.InitializeEditorAsync");
-            return jsRuntime.InvokeVoidAsync("editor", element);
+            var callback = DotNetObjectReference.Create(this);
+            return jsRuntime.InvokeVoidAsync("editor", elementId, callback).AsTask();
         }
 
-        public ValueTask<string> GetContent()
+        public Task<string> GetContentAsync() => jsRuntime.InvokeAsync<string>("editor.getContent").AsTask();
+
+        public Task SetContentAsync(string content) => jsRuntime.InvokeVoidAsync("editor.setContent", content).AsTask();
+
+        public Task FormatSelectionAsync(SelectionFormat format) => jsRuntime.InvokeVoidAsync("editor.formatSelection", format).AsTask();
+
+        [JSInvokable]
+        public void OnSelectionStart(JsonElement e)
         {
-            return jsRuntime.InvokeAsync<string>("editor.getContent");
+            var eventArgs = new SelectionEventArgs(String.Empty);
+            Raise(observer => observer.OnSelectionStart(eventArgs));
         }
 
-        public ValueTask SetContent(string content)
+        [JSInvokable]
+        public void OnSelectionChange(string text)
         {
-            Debug.WriteLine($"[EditorJsInterop.SetContent]");
-            return jsRuntime.InvokeVoidAsync("editor.setContent", content);
-        }
-
-        public ValueTask Apply(string htmlTag)
-        {
-            return jsRuntime.InvokeVoidAsync("editor.apply", htmlTag);
+            var eventArgs = new SelectionEventArgs(text);
+            Raise(observer => observer.OnSelectionChange(eventArgs));
         }
     }
 }

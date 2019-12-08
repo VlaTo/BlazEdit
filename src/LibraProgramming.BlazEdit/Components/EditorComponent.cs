@@ -1,23 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using LibraProgramming.BlazEdit.Commands;
+﻿using LibraProgramming.BlazEdit.Commands;
 using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.Events;
+using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Components
 {
-    public class EditorComponent : ComponentBase, IMessageHandler<RequireSelectionMessage>, IDisposable
+    public class EditorComponent : ComponentBase, IEditorContext, IMessageHandler<SelectionChangedMessage>, IDisposable
     {
-        //private readonly string generatedElementId;
-        private IEditorJSInterop editorInterop;
-        private EditorContext editorContext;
+        private readonly string generatedElementId;
+        private readonly BoldToolCommand boldCommand;
+        private readonly ItalicToolCommand italicCommand;
+        private IEditorJSInterop editor;
         private ITimeout timeout;
         private bool hasRendered;
-        private IDisposable subscription;
+        private IDisposable disposable;
+        private bool initialized;
 
         [Inject]
         public IJSRuntime JsRuntime
@@ -27,7 +28,7 @@ namespace LibraProgramming.BlazEdit.Components
         }
 
         [Inject]
-        public IMessageAggregator MessageAggregator
+        public IMessageDispatcher MessageDispatcher
         {
             get; 
             set;
@@ -41,16 +42,33 @@ namespace LibraProgramming.BlazEdit.Components
         }
 
         [Parameter]
-        public string Text { get; set; }
+        public string Text
+        {
+            get; 
+            set;
+        }
 
         [Parameter]
-        public EventCallback<string> TextChanged { get; set; }
+        public EventCallback<string> TextChanged
+        {
+            get; 
+            set;
+        }
 
-        protected IToolCommand MakeBold => editorContext.MakeBold;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected IToolCommand BoldCommand => boldCommand;
 
-        protected IToolCommand MakeItalic => editorContext.MakeItalic;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected IToolCommand ItalicCommand => italicCommand;
 
-        protected object[] Paragraphs { get; }
+        protected object[] Paragraphs
+        {
+            get;
+        }
 
         //protected string EditorElementId => generatedElementId;
 
@@ -59,6 +77,9 @@ namespace LibraProgramming.BlazEdit.Components
         public EditorComponent()
         {
             //generatedElementId = IdManager.Instance.Generate("editor-area");
+
+            boldCommand = new BoldToolCommand(this);
+            italicCommand = new ItalicToolCommand(this);
 
             Paragraphs = new []
             {
@@ -71,23 +92,40 @@ namespace LibraProgramming.BlazEdit.Components
 
         public void Dispose()
         {
-            subscription.Dispose();
+            disposable.Dispose();
         }
 
-        Task IMessageHandler<RequireSelectionMessage>.HandleAsync(RequireSelectionMessage message)
+        Task IMessageHandler<SelectionChangedMessage>.HandleAsync(SelectionChangedMessage message)
         {
-            Text = "<p>Sample text</p>";
-            return TextChanged.InvokeAsync(Text);
+            return Task.CompletedTask;
         }
+
+        Task IEditorContext.FormatSelectionAsync(SelectionFormat format) => editor.FormatSelectionAsync(format);
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
-            editorInterop = new EditorJsInterop(JsRuntime, Temp1);
-            editorContext = new EditorContext(Temp1, MessageAggregator, editorInterop);
+            var editorInterop = new EditorJsInterop(JsRuntime, generatedElementId);
 
-            subscription = MessageAggregator.Subscribe(this);
+            disposable = new CompositeDisposable(
+                editorInterop.Subscribe(SelectionObserver.Create(
+                    e =>
+                    {
+                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.Empty));
+                    },
+                    e =>
+                    {
+                        var selection = new Selection(e.Text);
+                        MessageDispatcher.Publish(new SelectionChangedMessage(selection));
+                    })
+                ),
+                MessageDispatcher.Subscribe(this),
+                MessageDispatcher.Subscribe(boldCommand),
+                MessageDispatcher.Subscribe(italicCommand)
+            );
+
+            editor = editorInterop;
         }
 
         protected override async Task OnParametersSetAsync()
@@ -111,18 +149,20 @@ namespace LibraProgramming.BlazEdit.Components
             }
         }
 
-        protected async Task UpdateText(string value)
+        // https://github.com/cloudcrate/BlazorStorage/blob/master/src/Storage.cs
+        private async Task EnsureInitializedAsync()
         {
-            Text = value;
-            await TextChanged.InvokeAsync(value);
+            if (initialized)
+            {
+                return ;
+            }
+
+            initialized = true;
+
+            await editor.InitializeEditorAsync();
         }
 
-        private void UpdateCommand(IToolCommand command)
-        {
-            MessageAggregator.Publish(new CommandMessage(command));
-        }
-
-        private Task DoAssignContent()
+        private async Task DoAssignContent()
         {
             if (null != timeout)
             {
@@ -130,79 +170,8 @@ namespace LibraProgramming.BlazEdit.Components
                 timeout = null;
             }
 
-            return editorContext.SetContentAsync(Text);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private class EditorContext : IEditorContext
-        {
-            private readonly ElementReference editorElement;
-            private readonly IMessageAggregator messageAggregator;
-            private readonly IEditorJSInterop editorInterop;
-            private readonly Dictionary<IToolCommand, bool> commands;
-            private bool initialized;
-
-            public IToolCommand MakeBold { get; }
-
-            public IToolCommand MakeItalic { get; }
-
-            public EditorContext(ElementReference editorElement, IMessageAggregator messageAggregator, IEditorJSInterop editorInterop)
-            {
-                this.editorElement = editorElement;
-                this.messageAggregator = messageAggregator;
-                this.editorInterop = editorInterop;
-                
-                commands = new Dictionary<IToolCommand, bool>();
-
-                MakeBold = new ToolCommand(DoMakeBoldAsync, CanMakeBold);
-                MakeItalic = new ToolCommand(DoMakeItalicAsync, CanMakeItalic);
-            }
-
-            public async Task<string> GetContent()
-            {
-                return await editorInterop.GetContent();
-            }
-
-            public async Task SetContentAsync(string content)
-            {
-                await EnsureInitializedAsync();
-                await editorInterop.SetContent(content);
-            }
-
-            private Task EnsureInitializedAsync()
-            {
-                if (initialized)
-                {
-                    return Task.CompletedTask;
-                }
-
-                initialized = true;
-
-                return editorInterop.InitializeEditorAsync().AsTask();
-            }
-
-            private Task DoMakeBoldAsync()
-            {
-                return editorInterop.Apply("strong").AsTask();
-            }
-
-            private async Task DoMakeItalicAsync()
-            {
-                Debug.WriteLine("EditorComponent.DoMakeItalic");
-                await Task.CompletedTask;
-            }
-
-            private bool CanMakeBold()
-            {
-                return true;
-            }
-
-            private bool CanMakeItalic()
-            {
-                return true;
-            }
+            await EnsureInitializedAsync();
+            await editor.SetContentAsync(Text);
         }
     }
 }

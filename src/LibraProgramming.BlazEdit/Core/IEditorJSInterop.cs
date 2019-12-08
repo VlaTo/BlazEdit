@@ -7,12 +7,12 @@ namespace LibraProgramming.BlazEdit.Core
     /// </summary>
     public interface IEditorJSInterop
     {
-        ValueTask InitializeEditorAsync();
+        Task InitializeEditorAsync();
 
-        ValueTask<string> GetContent();
+        Task<string> GetContentAsync();
 
-        ValueTask SetContent(string content);
+        Task SetContentAsync(string content);
 
-        ValueTask Apply(string htmlTag);
+        Task FormatSelectionAsync(SelectionFormat htmlTag);
     }
 }
