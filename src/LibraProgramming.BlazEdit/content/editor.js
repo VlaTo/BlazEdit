@@ -62,24 +62,50 @@ var Editor = /** @class */ (function () {
         return this.content;
     };
     Editor.prototype.onSelectionStart = function (e) {
-        this.callback.invokeMethodAsync("OnSelectionStart", e);
+        var ranges = new Array();
+        var item = {
+            start: null,
+            end: null,
+            startOffset: -1,
+            endOffset: -1,
+            text: ""
+        };
+        ranges.push(item);
+        this.callback.invokeMethodAsync("OnSelectionStart", ranges);
     };
     Editor.prototype.onSelectionChange = function (e) {
         var selection = this.document.getSelection();
-        var text = "";
+        var ranges = new Array();
         if (0 < selection.rangeCount) {
             for (var index = 0; index < selection.rangeCount; index++) {
                 var range = selection.getRangeAt(index);
-                text = range.toString();
+                var item = {
+                    start: null,
+                    end: null,
+                    startOffset: range.startOffset,
+                    endOffset: range.endOffset,
+                    text: range.toString()
+                };
                 var node = range.startContainer;
-                var path = new Array();
-                while (null !== node) {
-                    path.unshift(node.nodeName);
+                while (null != node) {
+                    item.start = {
+                        name: node.nodeName,
+                        nextNode: item.start
+                    };
                     node = node.parentNode;
                 }
+                node = range.endContainer;
+                while (null != node) {
+                    item.end = {
+                        name: node.nodeName,
+                        nextNode: item.end
+                    };
+                    node = node.parentNode;
+                }
+                ranges.push(item);
             }
         }
-        this.callback.invokeMethodAsync("OnSelectionChange", text);
+        this.callback.invokeMethodAsync("OnSelectionChange", ranges);
     };
     return Editor;
 }());

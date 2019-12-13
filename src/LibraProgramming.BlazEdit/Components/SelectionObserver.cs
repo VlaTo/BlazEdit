@@ -1,4 +1,5 @@
 ﻿using System;
+using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.TinyRx;
 
 namespace LibraProgramming.BlazEdit.Components

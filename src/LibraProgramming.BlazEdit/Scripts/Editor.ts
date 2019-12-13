@@ -71,32 +71,57 @@ class Editor implements IEditor {
     }
 
     private onSelectionStart(e: UIEvent): void {
-        this.callback.invokeMethodAsync("OnSelectionStart", e);
+        const ranges: ISelectionRange[] = new Array<ISelectionRange>();
+        let item: ISelectionRange = {
+            start: null,
+            end: null,
+            startOffset: -1,
+            endOffset: -1,
+            text: ""
+        };
+
+        ranges.push(item);
+
+        this.callback.invokeMethodAsync("OnSelectionStart", ranges);
     }
 
     private onSelectionChange(e: UIEvent): void {
         const selection = this.document.getSelection();
-        let text = "";
+        const ranges: ISelectionRange[] = new Array<ISelectionRange>();
 
         if (0 < selection.rangeCount) {
             for (let index = 0; index < selection.rangeCount; index++) {
                 const range = selection.getRangeAt(index);
-                text = range.toString();
+                const item: ISelectionRange = {
+                    start: null,
+                    end: null,
+                    startOffset: range.startOffset,
+                    endOffset: range.endOffset,
+                    text: range.toString()
+                };
 
                 let node = range.startContainer;
-                //let path = new Array<INode>();
-                let temp: INode = null;
-
-                while (null !== node) {
-                    temp = { name: node.nodeName, next: temp };
-                    //path.unshift();
+                while (null != node) {
+                    item.start = {
+                        name: node.nodeName,
+                        nextNode: item.start
+                    };
                     node = node.parentNode;
                 }
 
+                node = range.endContainer;
+                while (null != node) {
+                    item.end = {
+                        name: node.nodeName,
+                        nextNode: item.end
+                    };
+                    node = node.parentNode;
+                }
 
+                ranges.push(item);
             }
         }
 
-        this.callback.invokeMethodAsync("OnSelectionChange", text);
+        this.callback.invokeMethodAsync("OnSelectionChange", ranges);
     }
 }

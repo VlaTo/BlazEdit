@@ -116,7 +116,7 @@ namespace LibraProgramming.BlazEdit.Components
                     },
                     e =>
                     {
-                        var selection = new Selection(e.Text);
+                        var selection = new Selection(String.Empty);
                         MessageDispatcher.Publish(new SelectionChangedMessage(selection));
                     })
                 ),

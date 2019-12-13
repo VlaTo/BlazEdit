@@ -2,8 +2,10 @@ using LibraProgramming.BlazEdit.Components;
 using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.JSInterop;
 using System;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
+using LibraProgramming.BlazEdit.Core.Interop;
 
 namespace LibraProgramming.BlazEdit.Core
 {
@@ -65,19 +67,38 @@ namespace LibraProgramming.BlazEdit.Core
 
         public Task SetContentAsync(string content) => jsRuntime.InvokeVoidAsync("editor.setContent", content).AsTask();
 
-        public Task FormatSelectionAsync(SelectionFormat format) => jsRuntime.InvokeVoidAsync("editor.formatSelection", format).AsTask();
+        public Task FormatSelectionAsync(SelectionFormat format)
+        {
+
+            return jsRuntime.InvokeVoidAsync("editor.formatSelection", format).AsTask();
+        }
 
         [JSInvokable]
-        public void OnSelectionStart(JsonElement e)
+        public void OnSelectionStart(SelectionRange[] ranges)
         {
-            var eventArgs = new SelectionEventArgs(String.Empty);
+            var eventArgs = new SelectionEventArgs(ranges);
             Raise(observer => observer.OnSelectionStart(eventArgs));
         }
 
         [JSInvokable]
-        public void OnSelectionChange(string text)
+        public void OnSelectionChange(SelectionRange[] ranges)
         {
-            var eventArgs = new SelectionEventArgs(text);
+            var eventArgs = new SelectionEventArgs(Array.Empty<SelectionRange>());
+
+            for (int index = 0; index < ranges.Length; index++)
+            {
+                Debug.WriteLine($"Range index: {index}");
+
+                var range = ranges[index];
+                var node = range.StartNode;
+
+                while (null != node)
+                {
+                    Debug.WriteLine($"Node: {node.Name}");
+                    node = node.Next;
+                }
+            }
+
             Raise(observer => observer.OnSelectionChange(eventArgs));
         }
     }

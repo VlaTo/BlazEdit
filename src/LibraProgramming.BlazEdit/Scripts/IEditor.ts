@@ -28,8 +28,3 @@ interface IEditor {
      */
     getContent(): string;
 }
-
-interface INode {
-    name: string;
-    next: INode;
-}
