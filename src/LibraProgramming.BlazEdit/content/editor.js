@@ -107,6 +107,12 @@ var Editor = /** @class */ (function () {
         }
         this.callback.invokeMethodAsync("OnSelectionChange", ranges);
     };
+    Editor.prototype.onSelectionStart = function () {
+        console.log("[Editor.ts] Editor.onSelectionStart");
+    };
+    Editor.prototype.onSelectionChange = function () {
+        console.log("[Editor.ts] Editor.onSelectionChange");
+    };
     return Editor;
 }());
 //

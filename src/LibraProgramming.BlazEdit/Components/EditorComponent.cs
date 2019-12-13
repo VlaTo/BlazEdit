@@ -70,13 +70,13 @@ namespace LibraProgramming.BlazEdit.Components
             get;
         }
 
-        protected string EditorElementId => generatedElementId;
+        //protected string EditorElementId => generatedElementId;
 
         protected ElementReference Temp1;
 
         public EditorComponent()
         {
-            generatedElementId = IdManager.Instance.Generate("editor-area");
+            //generatedElementId = IdManager.Instance.Generate("editor-area");
 
             boldCommand = new BoldToolCommand(this);
             italicCommand = new ItalicToolCommand(this);

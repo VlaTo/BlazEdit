@@ -15,7 +15,7 @@ namespace LibraProgramming.BlazEdit.Core
     public class EditorJsInterop : ObservableBase<ISelectionObserver>, IEditorJSInterop
     {
         private readonly IJSRuntime jsRuntime;
-        private readonly string elementId;
+        private readonly ElementReference element;
 
 /*
         public event EventHandler<SelectionStartEventArgs> SelectionStart
@@ -53,7 +53,7 @@ namespace LibraProgramming.BlazEdit.Core
             }
 
             this.jsRuntime = jsRuntime;
-            this.elementId = elementId;
+            this.element = element;
         }
 
         public Task InitializeEditorAsync()
