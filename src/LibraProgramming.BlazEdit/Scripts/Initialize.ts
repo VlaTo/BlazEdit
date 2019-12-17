@@ -8,5 +8,5 @@
     const temp = document.getElementById(element.id);
     const host = element as HTMLIFrameElement;
 
-    (window as any).editor = new Editor(doc, callback);
+    (window as any).editor = new Editor(document, callback);
 };

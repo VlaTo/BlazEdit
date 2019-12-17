@@ -107,12 +107,6 @@ var Editor = /** @class */ (function () {
         }
         this.callback.invokeMethodAsync("OnSelectionChange", ranges);
     };
-    Editor.prototype.onSelectionStart = function () {
-        console.log("[Editor.ts] Editor.onSelectionStart");
-    };
-    Editor.prototype.onSelectionChange = function () {
-        console.log("[Editor.ts] Editor.onSelectionChange");
-    };
     return Editor;
 }());
 //
@@ -120,9 +114,7 @@ var Editor = /** @class */ (function () {
 //
 window.editor = function (elementId, callback) {
     var element = document.getElementById(elementId);
-    if (!element) {
-        return;
-    }
-    var doc = element.contentDocument || element.contentWindow.document;
-    window.editor = new Editor(doc, callback);
+    var temp = document.getElementById(element.id);
+    var host = element;
+    window.editor = new Editor(document, callback);
 };
