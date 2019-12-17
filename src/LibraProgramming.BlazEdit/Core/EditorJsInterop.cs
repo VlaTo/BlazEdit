@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
 using LibraProgramming.BlazEdit.Core.Interop;
+using Microsoft.AspNetCore.Components;
 
 namespace LibraProgramming.BlazEdit.Core
 {
@@ -15,7 +16,8 @@ namespace LibraProgramming.BlazEdit.Core
     public class EditorJsInterop : ObservableBase<ISelectionObserver>, IEditorJSInterop
     {
         private readonly IJSRuntime jsRuntime;
-        private readonly ElementReference element;
+        //private readonly ElementReference element;
+        private readonly string elementId;
 
 /*
         public event EventHandler<SelectionStartEventArgs> SelectionStart
@@ -53,7 +55,7 @@ namespace LibraProgramming.BlazEdit.Core
             }
 
             this.jsRuntime = jsRuntime;
-            this.element = element;
+            this.elementId = elementId;
         }
 
         public Task InitializeEditorAsync()

@@ -76,7 +76,7 @@ namespace LibraProgramming.BlazEdit.Components
 
         public EditorComponent()
         {
-            //generatedElementId = IdManager.Instance.Generate("editor-area");
+            generatedElementId = IdManager.Instance.Generate("editor-area");
 
             boldCommand = new BoldToolCommand(this);
             italicCommand = new ItalicToolCommand(this);

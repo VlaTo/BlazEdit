@@ -1,7 +1,7 @@
 ﻿interface ISelectionRange {
-    start: ISelectionNode;
-    end: ISelectionNode;
-    startOffset: number;
-    endOffset: number;
-    text: string;
+    Start: ISelectionNode;
+    End: ISelectionNode;
+    StartOffset: number;
+    EndOffset: number;
+    Text: string;
 }

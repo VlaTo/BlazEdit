@@ -7,11 +7,11 @@ interface ISelectionNode {
      * @property {ISelectionNode} nextNode
      *
      */
-    nextNode: ISelectionNode;
+    NextNode: ISelectionNode;
 
     /**
      * @property {string} name
      *
      */
-    name: string;
+    Name: string;
 }

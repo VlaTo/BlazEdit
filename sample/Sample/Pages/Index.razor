@@ -2,7 +2,7 @@
 
 @using System.Diagnostics
 
-<BlazEdit @bind-Text=Text />
+<BlazEdit @bind-Text=Text @bind-Text:event="TextChanged" />
 
 <div style="margin-top: 3em;">
     <button type="button" @onclick=@OnButton1Click>Set Text</button>

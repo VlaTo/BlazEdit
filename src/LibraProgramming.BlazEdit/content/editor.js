@@ -64,11 +64,11 @@ var Editor = /** @class */ (function () {
     Editor.prototype.onSelectionStart = function (e) {
         var ranges = new Array();
         var item = {
-            start: null,
-            end: null,
-            startOffset: -1,
-            endOffset: -1,
-            text: ""
+            Start: null,
+            End: null,
+            StartOffset: -1,
+            EndOffset: -1,
+            Text: ""
         };
         ranges.push(item);
         this.callback.invokeMethodAsync("OnSelectionStart", ranges);
@@ -80,25 +80,25 @@ var Editor = /** @class */ (function () {
             for (var index = 0; index < selection.rangeCount; index++) {
                 var range = selection.getRangeAt(index);
                 var item = {
-                    start: null,
-                    end: null,
-                    startOffset: range.startOffset,
-                    endOffset: range.endOffset,
-                    text: range.toString()
+                    Start: null,
+                    End: null,
+                    StartOffset: range.startOffset,
+                    EndOffset: range.endOffset,
+                    Text: range.toString()
                 };
                 var node = range.startContainer;
                 while (null != node) {
-                    item.start = {
-                        name: node.nodeName,
-                        nextNode: item.start
+                    item.Start = {
+                        Name: node.nodeName,
+                        NextNode: item.Start
                     };
                     node = node.parentNode;
                 }
                 node = range.endContainer;
                 while (null != node) {
-                    item.end = {
-                        name: node.nodeName,
-                        nextNode: item.end
+                    item.End = {
+                        Name: node.nodeName,
+                        NextNode: item.End
                     };
                     node = node.parentNode;
                 }
@@ -114,7 +114,7 @@ var Editor = /** @class */ (function () {
 //
 window.editor = function (elementId, callback) {
     var element = document.getElementById(elementId);
-    var temp = document.getElementById(element.id);
-    var host = element;
+    //const temp = document.getElementById(element.id);
+    //const host = element as HTMLIFrameElement;
     window.editor = new Editor(document, callback);
 };
