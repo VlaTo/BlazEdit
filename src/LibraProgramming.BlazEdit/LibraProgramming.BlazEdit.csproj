@@ -40,4 +40,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="content\background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
