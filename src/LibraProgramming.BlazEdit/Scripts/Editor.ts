@@ -66,6 +66,7 @@ class Editor implements IEditor {
     }
 
     /**
+     * @func getContent
      *
      */
     getContent(): string {
@@ -73,22 +74,29 @@ class Editor implements IEditor {
     }
 
     private onSelectionStart(e: UIEvent): void {
-        const ranges: ISelectionRange[] = new Array<ISelectionRange>();
-        let item: ISelectionRange = {
-            Start: null,
-            End: null,
-            StartOffset: -1,
-            EndOffset: -1,
-            Text: ""
-        };
-
-        ranges.push(item);
-
-        this.callback.invokeMethodAsync("OnSelectionStart", ranges);
+        const selection = this.contentDocument.getSelection();
+        const ranges: ISelectionRange[] = this.buildSelectionRanges(selection);
+        this.callback
+            .invokeMethodAsync("OnSelectionStart", ranges)
+            .then(
+                data => console.log('OnSelectionStart completed'),
+                reason => console.log('OnSelectionStart failed')
+            );
     }
 
     private onSelectionChange(e: UIEvent): void {
         const selection = this.contentDocument.getSelection();
+        const ranges: ISelectionRange[] = this.buildSelectionRanges(selection);
+
+        this.callback
+            .invokeMethodAsync("OnSelectionChange", ranges)
+            .then(
+                data => console.log('OnSelectionChange completed'),
+                reason => console.log('OnSelectionChange failed')
+            );
+    }
+
+    private buildSelectionRanges(selection: Selection): ISelectionRange[] {
         const ranges: ISelectionRange[] = new Array<ISelectionRange>();
 
         if (0 < selection.rangeCount) {
@@ -102,33 +110,59 @@ class Editor implements IEditor {
                     Text: range.toString()
                 };
 
+                const parents = new Array<{ node: Node, item: ISelectionNode }>();
+
+                // start
                 let node = range.startContainer;
+
                 while (null != node) {
                     item.Start = {
                         Name: node.nodeName,
                         NextNode: item.Start
                     };
+
+                    parents.push({ node: node, item: item.Start });
+
                     node = node.parentNode;
                 }
 
+                // end
                 node = range.endContainer;
-                while (null != node) {
-                    item.End = {
-                        Name: node.nodeName,
-                        NextNode: item.End
-                    };
-                    node = node.parentNode;
+
+                let position = this.findParent(parents, node);
+
+                if (0 > position) {
+                    while (null != node) {
+
+                        position = this.findParent(parents, node.parentNode);
+
+                        item.End = {
+                            Name: node.nodeName,
+                            NextNode: (0 > position) ? item.End : parents[position].item
+                        };
+
+                        if (-1 < position) {
+                            break;
+                        }
+                    }
+                } else {
+                    item.End = parents[position].item;
                 }
 
                 ranges.push(item);
             }
         }
 
-        this.callback
-            .invokeMethodAsync("OnSelectionChange", ranges)
-            .then(
-                data => console.log('OnSelectionChange completed'),
-                reason => console.log('OnSelectionChange failed')
-            );
+        return ranges;
+    }
+
+    private findParent(parents: { node: Node, item: ISelectionNode }[], actual: Node): number {
+        for (let index = 0; index < parents.length; index++) {
+            if (parents[index].node === actual) {
+                return index;
+            }
+        }
+
+        return -1;
     }
 }

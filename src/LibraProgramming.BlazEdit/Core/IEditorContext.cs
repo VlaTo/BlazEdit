@@ -7,6 +7,6 @@ namespace LibraProgramming.BlazEdit.Core
     /// </summary>
     public interface IEditorContext
     {
-        Task FormatSelectionAsync(SelectionFormat format);
+        ValueTask FormatSelectionAsync(SelectionFormat format);
     }
 }

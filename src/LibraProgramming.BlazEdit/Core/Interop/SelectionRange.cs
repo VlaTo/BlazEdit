@@ -1,14 +1,29 @@
 ﻿namespace LibraProgramming.BlazEdit.Core.Interop
 {
-    public class SelectionRange
+    public class SelectionNode
     {
-        public Core.SelectionNode StartNode
+        public string Name
         {
             get;
             set;
         }
 
-        public Core.SelectionNode EndNode
+        public SelectionNode NextNode
+        {
+            get;
+            set;
+        }
+    }
+
+    public class SelectionRange
+    {
+        public SelectionNode Start
+        {
+            get;
+            set;
+        }
+
+        public SelectionNode End
         {
             get;
             set;
@@ -26,7 +41,7 @@
             set;
         }
 
-        public string Content
+        public string Text
         {
             get;
             set;

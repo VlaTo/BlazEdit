@@ -57,48 +57,56 @@ namespace LibraProgramming.BlazEdit.Core
             this.elementId = elementId;
         }
 
-        public async Task InitializeEditorAsync()
+        public async ValueTask InitializeEditorAsync()
         {
-            Console.WriteLine("EditorJsInterop.InitializeEditorAsync");
-            
             var callback = DotNetObjectReference.Create(this);
-            
             await jsRuntime.InvokeVoidAsync("editor", elementId, callback);
         }
 
-        public async Task<string> GetContentAsync() => await jsRuntime.InvokeAsync<string>("editor.getContent");
+        public ValueTask<string> GetContentAsync() => jsRuntime.InvokeAsync<string>("editor.getContent");
 
-        public async Task SetContentAsync(string content) => await jsRuntime.InvokeVoidAsync("editor.setContent", content);
+        public ValueTask SetContentAsync(string content) => jsRuntime.InvokeVoidAsync("editor.setContent", content);
 
-        public async Task FormatSelectionAsync(SelectionFormat format) => await jsRuntime.InvokeVoidAsync("editor.formatSelection", format);
+        public ValueTask FormatSelectionAsync(SelectionFormat format) => jsRuntime.InvokeVoidAsync("editor.formatSelection", format);
 
         [JSInvokable]
-        public void OnSelectionStart(SelectionRange[] ranges)
+        public ValueTask OnSelectionStart(SelectionRange[] ranges)
         {
-            var eventArgs = new SelectionEventArgs(ranges);
+            var eventArgs = new SelectionEventArgs(SelectionChangeAction.SelectionStart, ranges);
             Raise(observer => observer.OnSelectionStart(eventArgs));
+            return new ValueTask(Task.CompletedTask);
         }
 
         [JSInvokable]
-        public void OnSelectionChange(SelectionRange[] ranges)
+        public ValueTask OnSelectionChange(SelectionRange[] ranges)
         {
-            var eventArgs = new SelectionEventArgs(Array.Empty<SelectionRange>());
+            var eventArgs = new SelectionEventArgs(SelectionChangeAction.SelectionChanged, ranges);
 
             for (int index = 0; index < ranges.Length; index++)
             {
                 Debug.WriteLine($"Range index: {index}");
 
                 var range = ranges[index];
-                var node = range.StartNode;
+                var node = range.Start;
 
                 while (null != node)
                 {
-                    Debug.WriteLine($"Node: {node.Name}");
-                    node = node.Next;
+                    Debug.WriteLine($"Start Node: {node.Name}");
+                    node = node.NextNode;
+                }
+
+                node = range.End;
+
+                while (null != node)
+                {
+                    Debug.WriteLine($"End Node: {node.Name}");
+                    node = node.NextNode;
                 }
             }
 
             Raise(observer => observer.OnSelectionChange(eventArgs));
+
+            return new ValueTask(Task.CompletedTask);
         }
     }
 }

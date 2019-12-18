@@ -19,7 +19,7 @@ namespace LibraProgramming.BlazEdit.Commands
         public override Task InvokeAsync()
         {
             var format = new SelectionFormat("italic");
-            return EditorContext.FormatSelectionAsync(format);
+            return EditorContext.FormatSelectionAsync(format).AsTask();
         }
 
         protected override Task DoSelectionChangedAsync(Selection selection)

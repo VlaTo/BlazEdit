@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.TinyRx;
 
@@ -82,14 +83,16 @@ namespace LibraProgramming.BlazEdit.Components
                 throw exception;
             }
 
-            public void OnSelectionStart(SelectionEventArgs e)
+            public ValueTask OnSelectionStart(SelectionEventArgs e)
             {
                 onSelectionStart.Invoke(e);
+                return new ValueTask(Task.CompletedTask);
             }
 
-            public void OnSelectionChange(SelectionEventArgs e)
+            public ValueTask OnSelectionChange(SelectionEventArgs e)
             {
                 onSelectionChange.Invoke(e);
+                return new ValueTask(Task.CompletedTask);
             }
         }
 
@@ -125,14 +128,16 @@ namespace LibraProgramming.BlazEdit.Components
                 onError.Invoke(exception);
             }
 
-            public void OnSelectionStart(SelectionEventArgs e)
+            public ValueTask OnSelectionStart(SelectionEventArgs e)
             {
                 onSelectionStart.Invoke(e);
+                return new ValueTask(Task.CompletedTask);
             }
 
-            public void OnSelectionChange(SelectionEventArgs e)
+            public ValueTask OnSelectionChange(SelectionEventArgs e)
             {
                 onSelectionChange.Invoke(e);
+                return new ValueTask(Task.CompletedTask);
             }
         }
     }

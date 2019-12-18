@@ -1,4 +1,5 @@
-﻿using LibraProgramming.BlazEdit.Core;
+﻿using System.Threading.Tasks;
+using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.TinyRx;
 
 namespace LibraProgramming.BlazEdit.Components
@@ -12,12 +13,12 @@ namespace LibraProgramming.BlazEdit.Components
         /// 
         /// </summary>
         /// <param name="e"></param>
-        void OnSelectionStart(SelectionEventArgs e);
+        ValueTask OnSelectionStart(SelectionEventArgs e);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="e"></param>
-        void OnSelectionChange(SelectionEventArgs e);
+        ValueTask OnSelectionChange(SelectionEventArgs e);
     }
 }

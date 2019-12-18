@@ -99,7 +99,7 @@ namespace LibraProgramming.BlazEdit.Components
             return Task.CompletedTask;
         }
 
-        Task IEditorContext.FormatSelectionAsync(SelectionFormat format) => editor.FormatSelectionAsync(format);
+        ValueTask IEditorContext.FormatSelectionAsync(SelectionFormat format) => editor.FormatSelectionAsync(format);
 
         protected override async Task OnInitializedAsync()
         {
