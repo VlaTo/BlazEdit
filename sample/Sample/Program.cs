@@ -1,5 +1,4 @@
-﻿using LibraProgramming.BlazEdit.Core;
-using Microsoft.AspNetCore.Blazor.Hosting;
+﻿using Microsoft.AspNetCore.Blazor.Hosting;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,12 +8,13 @@ namespace Sample
     {
         public static void Main(string[] args)
         {
-            var host = BlazorWebAssemblyHost.CreateDefaultBuilder()
+            var host = BlazorWebAssemblyHost
+                .CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    services
+                    /*services
                         .AddSingleton<ITimeoutManager, TimeoutManager>()
-                        .AddSingleton<IMessageDispatcher, MessageDispatcher>();
+                        .AddSingleton<IMessageDispatcher, MessageDispatcher>();*/
                 })
                 .UseBlazorStartup<Startup>()
                 .Build();

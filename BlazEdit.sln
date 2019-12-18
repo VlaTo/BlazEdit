@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29311.281
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "sample\Sample\Sample.csproj", "{F2040960-6EE7-4818-99AC-BFD4B068BB03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraProgramming.BlazEdit", "src\LibraProgramming.BlazEdit\LibraProgramming.BlazEdit.csproj", "{4588BB7E-1868-44B6-A2B8-39EC74B29B53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraProgramming.BlazEdit", "src\LibraProgramming.BlazEdit\LibraProgramming.BlazEdit.csproj", "{B89E5D67-A8D8-47BB-9545-58DD42E19607}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{F2040960-6EE7-4818-99AC-BFD4B068BB03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2040960-6EE7-4818-99AC-BFD4B068BB03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2040960-6EE7-4818-99AC-BFD4B068BB03}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4588BB7E-1868-44B6-A2B8-39EC74B29B53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4588BB7E-1868-44B6-A2B8-39EC74B29B53}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4588BB7E-1868-44B6-A2B8-39EC74B29B53}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4588BB7E-1868-44B6-A2B8-39EC74B29B53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89E5D67-A8D8-47BB-9545-58DD42E19607}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89E5D67-A8D8-47BB-9545-58DD42E19607}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89E5D67-A8D8-47BB-9545-58DD42E19607}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89E5D67-A8D8-47BB-9545-58DD42E19607}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

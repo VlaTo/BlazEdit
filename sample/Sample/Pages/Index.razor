@@ -1,28 +1,5 @@
 ﻿@page "/"
 
-@using System.Diagnostics
+<h4>BlazEdit sample</h4>
 
-<BlazEdit @bind-Text=Text @bind-Text:event="TextChanged" />
-
-<div style="margin-top: 3em;">
-    <button type="button" @onclick=@OnButton1Click>Set Text</button>
-    <button type="button" @onclick=@OnButton2Click>Get Text</button>
-</div>
-
-@code {
-
-    private string text;
-
-    public string Text { get; set; } = "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>";
-
-    private void OnButton1Click(MouseEventArgs e)
-    {
-        Text = "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae feugiat mauris. Praesent condimentum, turpis sit amet vehicula volutpat, massa nulla gravida lorem, quis pharetra ipsum lorem vel risus. Morbi urna enim, dapibus tempor mattis scelerisque, tristique in tortor. Nulla suscipit, diam in vulputate finibus, sem est scelerisque turpis, vel ultricies massa purus sit amet nisl. Sed ac diam euismod, gravida libero ut, facilisis elit. Sed rutrum ultrices iaculis. Nunc sed mauris pretium, sagittis purus non, fermentum nisl. Cras ultricies cursus sapien, vel fringilla lorem dignissim in. Morbi lacus nisi, tristique ut nisi nec, luctus aliquet nunc. Mauris ornare pellentesque placerat.</p>";
-    }
-
-    private void OnButton2Click(MouseEventArgs e)
-    {
-        Debug.WriteLine(Text);
-    }
-
-}
+<Component1 />

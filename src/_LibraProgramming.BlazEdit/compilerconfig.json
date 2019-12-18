@@ -1,7 +1,7 @@
 [
   {
-    "inputFile": "Styles/Editor.less",
-    "outputFile": "wwwroot/editor.css",
+    "inputFile": "Less/Editor.less",
+    "outputFile": "content/css/editor.css",
     "includeInProject": true,
     "minify": {
       "enabled": false

@@ -2,48 +2,57 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <OutputType>Library</OutputType>
-    <IsPackable>true</IsPackable>
-    <BlazorLinkOnBuild>false</BlazorLinkOnBuild>
-    <LangVersion>7.3</LangVersion>
     <RazorLangVersion>3.0</RazorLangVersion>
+    <LangVer>7.3</LangVer>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- .js/.css files will be referenced via <script>/<link> tags; other content files will just be included in the app's 'dist' directory without any tags referencing them -->
-    <EmbeddedResource Include="content\**\*.js" LogicalName="blazor:js:%(RecursiveDir)%(Filename)%(Extension)" />
-    <EmbeddedResource Include="content\**\*.css" LogicalName="blazor:css:%(RecursiveDir)%(Filename)%(Extension)" />
-    <EmbeddedResource Include="content\**" Exclude="**\*.js;**\*.css" LogicalName="blazor:file:%(RecursiveDir)%(Filename)%(Extension)" />
+    <Content Remove="compilerconfig.json" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Scripts\IDotNetCallback.ts" />
-    <None Remove="Scripts\IEditor.ts" />
-    <None Remove="Scripts\Initialize.ts" />
-    <None Remove="Scripts\Interop\ISelectionChangeCallbackArgs.ts" />
-    <None Remove="Scripts\Interop\ISelectionNode.ts" />
-    <None Remove="Scripts\Interop\ISelectionRange.ts" />
-    <None Remove="Scripts\ISelectionFormat.ts" />
-  </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Less\Editor.less" />
-    <Content Include="Scripts\Editor.ts" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.1.0-preview4.19579.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="3.1.0-preview4.19579.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.0" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
+
   <ItemGroup>
-    <EmbeddedResource Update="content\background.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Folder Include="Styles\" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Update="wwwroot\editor.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>True</TypeScriptNoImplicitAny>
+    <TypeScriptRemoveComments>True</TypeScriptRemoveComments>
+    <TypeScriptOutFile>wwwroot\editor.js</TypeScriptOutFile>
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot>\Scripts</TypeScriptSourceRoot>
+  </PropertyGroup>
 
 </Project>

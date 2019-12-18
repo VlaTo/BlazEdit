@@ -1,0 +1,99 @@
+﻿.editor {
+    position: initial;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.2);
+    text-align: left;
+    border: 1px solid rgb(204, 204, 204);
+    background-image: url("~\background.png");
+
+    .editor-toolbar {
+        background-color: #FFFFFF;
+        float: none;
+        height: auto;
+        width: auto;
+        max-width: none;
+        position: static;
+        display: flex;
+        flex: 0 0 auto;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+
+        .editor-toolbar-horizontal {
+            > div.editor-toolbar {
+                height: 100%;
+            }
+        }
+
+        .editor-toolbar-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 0;
+            padding: 0 4px;
+            width: auto;
+
+            &:not(last-of-type) {
+                border-right: 1px solid #CCC;
+            }
+
+            .editor-toolbar-item {
+            }
+        }
+
+        .editor-toolbar-item {
+            display: flex;
+            border: 0;
+            border-radius: 3px;
+            box-shadow: none;
+            align-items: center;
+            justify-content: center;
+            height: 34px;
+            background: 0 0;
+            color: #222F3E;
+            overflow: hidden;
+            margin: 2px 0;
+
+            &:hover:not(disabled) {
+                background: #DEE0E2;
+                border: 0;
+                color: #222F3E;
+            }
+        }
+
+        .toolbar-button {
+            cursor: pointer;
+            width: 34px;
+        }
+
+        .toolbar-selection {
+            align-items: flex-start;
+
+            .selection-label {
+                justify-content: left;
+                text-align: left;
+                width: 7em;
+            }
+
+            .selection-chevron {
+            }
+        }
+    }
+
+    .editor-edit-area {
+        display: flex;
+        position: relative;
+        flex: 1;
+        overflow: hidden;
+        height: auto;
+        width: auto;
+        border-top: 1px solid #CCC;
+
+        .editor-edit {
+            background-color: white;
+            box-sizing: border-box;
+            position: absolute;
+            border: 0;
+            width: 100%;
+            height: 100%;
+        }
+    }
+}
