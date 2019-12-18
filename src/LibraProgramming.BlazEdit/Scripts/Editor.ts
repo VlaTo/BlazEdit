@@ -3,7 +3,8 @@
  *
  */
 class Editor implements IEditor {
-    private document: Document;
+    private host: HTMLIFrameElement;
+    private contentDocument: Document;
     private callback: IDotNetCallback;
 
     /**
@@ -11,11 +12,11 @@ class Editor implements IEditor {
      * @returns {string} 
      */
     get content(): string {
-        return this.document.body.innerHTML;
+        return this.contentDocument.body.innerHTML;
     }
 
     set content(value: string) {
-        this.document.body.innerHTML = value;
+        this.contentDocument.body.innerHTML = value;
     }
 
     /**
@@ -23,17 +24,18 @@ class Editor implements IEditor {
      * @param {Document} document
      * @param {any} instance
      */
-    constructor(document: Document, callback: IDotNetCallback) {
-        this.document = document;
+    constructor(host: HTMLIFrameElement, callback: IDotNetCallback) {
+        this.host = host;
         this.callback = callback;
 
         const onSelectionStart = this.onSelectionStart.bind(this);
         const onSelectionChange = this.onSelectionChange.bind(this);
 
-        this.document.addEventListener("selectstart", onSelectionStart);
-        this.document.addEventListener("selectionchange", onSelectionChange);
+        this.contentDocument = host.contentDocument;
 
-        this.document.body.setAttribute("contenteditable", "true");
+        this.contentDocument.addEventListener("selectstart", onSelectionStart);
+        this.contentDocument.addEventListener("selectionchange", onSelectionChange);
+        this.contentDocument.body.setAttribute("contenteditable", "true");
     }
 
     /**
@@ -41,12 +43,12 @@ class Editor implements IEditor {
      * @param {ISelectionFormat} format
      */
     formatSelection(format: ISelectionFormat): void {
-        const selection = this.document.getSelection();
+        const selection = this.contentDocument.getSelection();
 
         if (0 < selection.rangeCount) {
             for (let index = 0; index < selection.rangeCount; index++) {
                 const range = selection.getRangeAt(index);
-                const element = this.document.createElement(format.elementName);
+                const element = this.contentDocument.createElement(format.elementName);
 
                 range.surroundContents(element);
             }
@@ -86,7 +88,7 @@ class Editor implements IEditor {
     }
 
     private onSelectionChange(e: UIEvent): void {
-        const selection = this.document.getSelection();
+        const selection = this.contentDocument.getSelection();
         const ranges: ISelectionRange[] = new Array<ISelectionRange>();
 
         if (0 < selection.rangeCount) {
