@@ -10,7 +10,7 @@
     }
   },
   {
-    "outputFile": "wwwroot/Content.css",
+    "outputFile": "wwwroot/content.css",
     "inputFile": "Styles/Content.less",
     "minify": {
       "enabled": false

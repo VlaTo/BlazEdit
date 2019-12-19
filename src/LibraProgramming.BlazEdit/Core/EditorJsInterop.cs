@@ -67,17 +67,9 @@ namespace LibraProgramming.BlazEdit.Core
         public ValueTask FormatSelectionAsync(SelectionFormat format) => jsRuntime.InvokeVoidAsync("editor.formatSelection", format);
 
         [JSInvokable]
-        public ValueTask OnSelectionStart(SelectionRange[] ranges)
+        public ValueTask OnSelectionChange(SelectionChangeAction action, SelectionRange[] ranges)
         {
-            var eventArgs = new SelectionEventArgs(SelectionChangeAction.SelectionStart, ranges);
-            Raise(observer => observer.OnSelectionStart(eventArgs));
-            return new ValueTask(Task.CompletedTask);
-        }
-
-        [JSInvokable]
-        public ValueTask OnSelectionChange(SelectionRange[] ranges)
-        {
-            var eventArgs = new SelectionEventArgs(SelectionChangeAction.SelectionChanged, ranges);
+            var eventArgs = new SelectionEventArgs(action, ranges);
             Raise(observer => observer.OnSelectionChange(eventArgs));
             return new ValueTask(Task.CompletedTask);
         }

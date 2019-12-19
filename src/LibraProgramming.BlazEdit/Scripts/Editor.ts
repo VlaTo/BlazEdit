@@ -1,4 +1,13 @@
 ﻿/**
+* @enum SelectionChangeAction
+*
+*/
+enum SelectionChangeAction {
+    SelectionStart,
+    SelectionChanged
+}
+
+/**
  * @class Editor
  *
  */
@@ -36,6 +45,16 @@ class Editor implements IEditor {
         this.contentDocument.addEventListener("selectstart", onSelectionStart);
         this.contentDocument.addEventListener("selectionchange", onSelectionChange);
         this.contentDocument.body.setAttribute("contenteditable", "true");
+
+        let link = this.contentDocument.createElement("link");
+
+        link.rel = "stylesheet";
+        link.type = "text/css";
+        link.crossOrigin = "anonymous";
+        link.referrerPolicy = "origin";
+        link.href = "_content/LibraProgramming.BlazEdit/content.css";
+
+        this.contentDocument.head.append(link);
     }
     
     /**
@@ -75,26 +94,27 @@ class Editor implements IEditor {
     }
 
     private onSelectionStart(e: UIEvent): void {
-        const selection = this.contentDocument.getSelection();
-        const ranges: ISelectionRange[] = this.buildSelectionRanges(selection);
-        this.callback
-            .invokeMethodAsync("OnSelectionStart", ranges)
+        this
+            .selectionChangeCallback(SelectionChangeAction.SelectionStart)
             .then(
-                data => {},
-                reason => {}
+                data => { },
+                reason => { }
             );
     }
 
     private onSelectionChange(e: UIEvent): void {
+        this
+            .selectionChangeCallback(SelectionChangeAction.SelectionChanged)
+            .then(
+                data => { },
+                reason => { }
+            );
+    }
+
+    private selectionChangeCallback(action: SelectionChangeAction): Promise<any> {
         const selection = this.contentDocument.getSelection();
         const ranges: ISelectionRange[] = this.buildSelectionRanges(selection);
-
-        this.callback
-            .invokeMethodAsync("OnSelectionChange", ranges)
-            .then(
-                data => {} ,
-                reason => {}
-            );
+        return this.callback.invokeMethodAsync("OnSelectionChange", action, ranges);
     }
 
     private buildSelectionRanges(selection: Selection): ISelectionRange[] {
