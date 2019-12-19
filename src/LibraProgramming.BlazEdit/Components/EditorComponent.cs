@@ -59,12 +59,12 @@ namespace LibraProgramming.BlazEdit.Components
         /// <summary>
         /// 
         /// </summary>
-        protected IToolCommand BoldCommand => boldCommand;
+        protected FormatToolCommand BoldCommand => boldCommand;
 
         /// <summary>
         /// 
         /// </summary>
-        protected IToolCommand ItalicCommand => italicCommand;
+        protected FormatToolCommand ItalicCommand => italicCommand;
 
         protected object[] Paragraphs
         {
@@ -111,12 +111,11 @@ namespace LibraProgramming.BlazEdit.Components
                 editorInterop.Subscribe(SelectionObserver.Create(
                     e =>
                     {
-                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.Empty));
+                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.From(e)));
                     },
                     e =>
                     {
-                        var selection = new Selection(String.Empty);
-                        MessageDispatcher.Publish(new SelectionChangedMessage(selection));
+                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.From(e)));
                     })
                 ),
                 MessageDispatcher.Subscribe(this),

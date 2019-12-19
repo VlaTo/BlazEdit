@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using LibraProgramming.BlazEdit.Core;
-using LibraProgramming.BlazEdit.Events;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Commands
 {
@@ -26,8 +24,9 @@ namespace LibraProgramming.BlazEdit.Commands
 
         protected override Task DoSelectionChangedAsync(Selection selection)
         {
-            Debug.WriteLine($"[{nameof(BoldToolCommand)}.DoSelectionChangedAsync] Selection: {selection.GetSelectionText()}");
-            return base.DoSelectionChangedAsync(selection);
+            IsApplied = selection.HasNode("strong");
+            Console.WriteLine($"Has strong: {IsApplied}");
+            return Task.CompletedTask;
         }
     }
 }

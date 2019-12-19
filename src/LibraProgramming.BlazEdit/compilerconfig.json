@@ -1,13 +1,22 @@
-[
+﻿[
   {
-    "inputFile": "Styles/Editor.less",
     "outputFile": "wwwroot/editor.css",
-    "includeInProject": true,
+    "inputFile": "Styles/Editor.less",
     "minify": {
       "enabled": false
     },
     "options": {
-      "sourceMap": false 
-    } 
+      "sourceMap": false
+    }
+  },
+  {
+    "outputFile": "wwwroot/Content.css",
+    "inputFile": "Styles/Content.less",
+    "minify": {
+      "enabled": false
+    },
+    "options": {
+      "sourceMap": false
+    }
   }
 ]

@@ -10,6 +10,14 @@ namespace LibraProgramming.BlazEdit.Commands
         /// <summary>
         /// 
         /// </summary>
+        bool IsApplied
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <returns></returns>
         bool CanInvoke();
 

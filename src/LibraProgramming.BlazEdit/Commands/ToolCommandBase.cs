@@ -12,12 +12,26 @@ namespace LibraProgramming.BlazEdit.Commands
         /// <summary>
         /// 
         /// </summary>
-        protected Func<Task> Action { get; }
+        public bool IsApplied
+        {
+            get;
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        protected Func<bool> Condition { get; }
+        protected Func<Task> Action
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected Func<bool> Condition
+        {
+            get;
+        }
 
         /// <summary>
         /// 

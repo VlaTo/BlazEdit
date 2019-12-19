@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using LibraProgramming.BlazEdit.Core;
+using LibraProgramming.BlazEdit.Core.Extensions;
 using System.Threading.Tasks;
-using LibraProgramming.BlazEdit.Core;
 
 namespace LibraProgramming.BlazEdit.Commands
 {
@@ -24,8 +24,8 @@ namespace LibraProgramming.BlazEdit.Commands
 
         protected override Task DoSelectionChangedAsync(Selection selection)
         {
-            Debug.WriteLine($"[{nameof(ItalicToolCommand)}.DoSelectionChangedAsync] Selection: {selection.GetSelectionText()}");
-            return base.DoSelectionChangedAsync(selection);
+            IsApplied = selection.HasNode("#italic");
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,12 +1,9 @@
 using LibraProgramming.BlazEdit.Components;
+using LibraProgramming.BlazEdit.Core.Interop;
 using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.JSInterop;
 using System;
-using System.Diagnostics;
-using System.Text.Json;
 using System.Threading.Tasks;
-using LibraProgramming.BlazEdit.Core.Interop;
-using Microsoft.AspNetCore.Components;
 
 namespace LibraProgramming.BlazEdit.Core
 {
@@ -81,31 +78,7 @@ namespace LibraProgramming.BlazEdit.Core
         public ValueTask OnSelectionChange(SelectionRange[] ranges)
         {
             var eventArgs = new SelectionEventArgs(SelectionChangeAction.SelectionChanged, ranges);
-
-            for (int index = 0; index < ranges.Length; index++)
-            {
-                Debug.WriteLine($"Range index: {index}");
-
-                var range = ranges[index];
-                var node = range.Start;
-
-                while (null != node)
-                {
-                    Debug.WriteLine($"Start Node: {node.Name}");
-                    node = node.NextNode;
-                }
-
-                node = range.End;
-
-                while (null != node)
-                {
-                    Debug.WriteLine($"End Node: {node.Name}");
-                    node = node.NextNode;
-                }
-            }
-
             Raise(observer => observer.OnSelectionChange(eventArgs));
-
             return new ValueTask(Task.CompletedTask);
         }
     }

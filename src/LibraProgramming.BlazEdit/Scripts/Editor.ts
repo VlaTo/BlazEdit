@@ -20,7 +20,7 @@ class Editor implements IEditor {
     }
 
     /**
-     * 
+     * @constructor
      * @param {Document} document
      * @param {any} instance
      */
@@ -37,10 +37,11 @@ class Editor implements IEditor {
         this.contentDocument.addEventListener("selectionchange", onSelectionChange);
         this.contentDocument.body.setAttribute("contenteditable", "true");
     }
-
+    
     /**
-     * Wraps current selection with htmlTag specified.
+     * @func formatSelection
      * @param {ISelectionFormat} format
+     * Wraps current selection with htmlTag specified.
      */
     formatSelection(format: ISelectionFormat): void {
         const selection = this.contentDocument.getSelection();
@@ -79,8 +80,8 @@ class Editor implements IEditor {
         this.callback
             .invokeMethodAsync("OnSelectionStart", ranges)
             .then(
-                data => console.log('OnSelectionStart completed'),
-                reason => console.log('OnSelectionStart failed')
+                data => {},
+                reason => {}
             );
     }
 
@@ -91,8 +92,8 @@ class Editor implements IEditor {
         this.callback
             .invokeMethodAsync("OnSelectionChange", ranges)
             .then(
-                data => console.log('OnSelectionChange completed'),
-                reason => console.log('OnSelectionChange failed')
+                data => {} ,
+                reason => {}
             );
     }
 
@@ -110,44 +111,10 @@ class Editor implements IEditor {
                     Text: range.toString()
                 };
 
-                const parents = new Array<{ node: Node, item: ISelectionNode }>();
+                const nodes = new Array<{ node: Node, item: ISelectionNode }>();
 
-                // start
-                let node = range.startContainer;
-
-                while (null != node) {
-                    item.Start = {
-                        Name: node.nodeName,
-                        NextNode: item.Start
-                    };
-
-                    parents.push({ node: node, item: item.Start });
-
-                    node = node.parentNode;
-                }
-
-                // end
-                node = range.endContainer;
-
-                let position = this.findParent(parents, node);
-
-                if (0 > position) {
-                    while (null != node) {
-
-                        position = this.findParent(parents, node.parentNode);
-
-                        item.End = {
-                            Name: node.nodeName,
-                            NextNode: (0 > position) ? item.End : parents[position].item
-                        };
-
-                        if (-1 < position) {
-                            break;
-                        }
-                    }
-                } else {
-                    item.End = parents[position].item;
-                }
+                this.createStartNodes(range, item, nodes);
+                this.createEndNodes(range, item, nodes);
 
                 ranges.push(item);
             }
@@ -156,7 +123,7 @@ class Editor implements IEditor {
         return ranges;
     }
 
-    private findParent(parents: { node: Node, item: ISelectionNode }[], actual: Node): number {
+    private findNodeIndex(parents: { node: Node, item: ISelectionNode }[], actual: Node): number {
         for (let index = 0; index < parents.length; index++) {
             if (parents[index].node === actual) {
                 return index;
@@ -164,5 +131,59 @@ class Editor implements IEditor {
         }
 
         return -1;
+    }
+
+    private createStartNodes(range: Range, item: ISelectionRange, nodes: { node: Node, item: ISelectionNode }[]): void {
+        let last: ISelectionNode = null;
+        let current = range.startContainer;
+
+        while (null != current) {
+            const node: ISelectionNode = {
+                Name: current.nodeName,
+                NextNode: null
+            };
+
+            if (null == item.Start) {
+                item.Start = node;
+            }
+
+            if (last != null) {
+                last.NextNode = node;
+            }
+
+            last = node;
+
+            nodes.push({ node: current, item: node });
+
+            current = current.parentNode;
+        }
+    }
+
+    private createEndNodes(range: Range, item: ISelectionRange, nodes: { node: Node, item: ISelectionNode }[]): void {
+        let current = range.endContainer;
+        let last: ISelectionNode = null;
+
+        while (null != current) {
+            const index = this.findNodeIndex(nodes, current);
+            const node: ISelectionNode = (-1 < index)
+                ? nodes[index].item
+                : { Name: current.nodeName, NextNode: null };
+
+            if (null == item.End) {
+                item.End = node;
+            }
+
+            if (-1 < index) {
+                break;
+            }
+
+            if (null != last) {
+                last.NextNode = node;
+            }
+
+            last = node;
+
+            current = current.parentNode;
+        }
     }
 }
