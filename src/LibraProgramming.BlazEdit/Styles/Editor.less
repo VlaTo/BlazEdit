@@ -1,4 +1,21 @@
-﻿.editor {
+﻿
+.toolbar-button {
+    cursor: pointer;
+    width: 34px;
+
+    &.disabled {
+        pointer-events: none;
+    }
+
+    //& .toggled, & .toggled:hover {
+    //    background: #C8CBCF;
+    //    border: 0;
+    //    box-shadow: none;
+    //    color: #222F3E;
+    //}
+}
+
+.editor {
     position: initial;
     box-shadow: 0 2px 8px 0 rgba(0,0,0,0.2);
     text-align: left;
@@ -54,16 +71,15 @@
                     color: #222F3E;
                 }
 
-                 > .toolbar-button {
+                &.toolbar-button {
                     cursor: pointer;
                     width: 34px;
 
-                    &.disabled {
-                        pointer-events: none;
-                    }
-
-                    &.toggled {
-                        display: unset;
+                    &.toggled, &.toggled:hover {
+                        background: #C8CBCF;
+                        border: 0;
+                        box-shadow: none;
+                        color: #222F3E;
                     }
                 }
             }
@@ -99,39 +115,6 @@
             border: 0;
             width: 100%;
             height: 100%;
-        }
-    }
-}
-
-.editor-toolbar-item {
-    display: flex;
-    border: 0;
-    border-radius: 3px;
-    box-shadow: none;
-    align-items: center;
-    justify-content: center;
-    height: 34px;
-    background: 0 0;
-    color: #222F3E;
-    overflow: hidden;
-    margin: 2px 0;
-
-    &:hover:not(disabled) {
-        background: #DEE0E2;
-        border: 0;
-        color: #222F3E;
-    }
-
-    .toolbar-button {
-        cursor: pointer;
-        width: 34px;
-
-        &.disabled {
-            pointer-events: none;
-        }
-
-        &.toggled {
-            display: unset;
         }
     }
 }
