@@ -1,47 +1,27 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using LibraProgramming.BlazEdit.Commands;
+﻿using LibraProgramming.BlazEdit.Commands;
 using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.Events;
 using LibraProgramming.BlazEdit.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
+using System;
+using System.Diagnostics;
+using System.Reactive.Disposables;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Components
 {
-    public sealed class ToggleButton : ToolComponent, IMessageHandler<ToggleButtonMessage>, IObserver<IToolCommand>
+    public sealed class ToggleButton : ToolButtonBase, IMessageHandler<ToggleButtonMessage>
     {
-        private static readonly ClassBuilder<ToggleButton> classBuilder;
-        private readonly EventCallback<MouseEventArgs> clickCallback;
-        private string classString;
-        private bool hasRendered;
+        private static readonly ClassBuilder<ToggleButton> ButtonClassBuilder;
+        private readonly CompositeDisposable subscriptions;
         private IDisposable subscription;
-        private IDisposable commanDisposable;
         private bool toggled;
-        private bool enabled;
-        private IObservableToolCommand command;
+        private IToolCommand command;
 
         [Parameter]
-        public bool Enabled
-        {
-            get => enabled;
-            set
-            {
-                if (enabled == value)
-                {
-                    return;
-                }
-
-                enabled = value;
-
-                UpdateState();
-            }
-        }
-
-        [Parameter]
-        public IObservableToolCommand Command
+        public IToolCommand Command
         {
             get => command;
             set
@@ -51,26 +31,24 @@ namespace LibraProgramming.BlazEdit.Components
                     return;
                 }
 
-                if (null != command)
+                if (null != subscription)
                 {
-                    commanDisposable?.Dispose();
-                    commanDisposable = null;
+                    if (subscriptions.Remove(subscription))
+                    {
+                        subscription.Dispose();
+                    }
+
+                    subscription = null;
                 }
 
                 command = value;
 
-                if (null != command)
+                if (command is IObservableToolCommand observable)
                 {
-                    commanDisposable = command.Subscribe(this);
+                    subscription = observable.Subscribe(OnCommandUpdated);
+                    subscriptions.Add(subscription);
                 }
             }
-        }
-
-        [Parameter]
-        public string Tooltip
-        {
-            get;
-            set;
         }
 
         [Parameter]
@@ -102,65 +80,22 @@ namespace LibraProgramming.BlazEdit.Components
             set;
         }
 
-        [Inject]
-        public IMessageDispatcher MessageDispatcher
-        {
-            get;
-            set;
-        }
-
-        [Parameter]
-        public RenderFragment ChildContent
-        {
-            get;
-            set;
-        }
-
-        [Parameter]
-        public EventCallback<MouseEventArgs> OnClick
-        {
-            get;
-            set;
-        }
-
         public ToggleButton()
+            : base(ButtonClassBuilder)
         {
-            clickCallback = EventCallback.Factory.Create<MouseEventArgs>(this, DoClickAsync);
-            Enabled = true;
+            toggled = false;
+            subscriptions = new CompositeDisposable(4);
         }
 
         static ToggleButton()
         {
-            classBuilder = ClassBuilder.CreateFor<ToggleButton>(null)
-                .DefineClass(@class => @class
-                    .Name("editor-toolbar-item")
-                    .NoPrefix()
-                )
-                .DefineClass(@class => @class
-                    .Name("toolbar-button")
-                    .NoPrefix()
-                )
-                .DefineClass(@class => @class
-                    .Name("disabled")
-                    .NoPrefix()
-                    .Condition(component => component.IsDisabled())
-                )
-                .DefineClass(@class => @class
-                    .Name("toggled")
-                    .NoPrefix()
-                    .Condition(component => component.IsToggled)
-                );
+            ButtonClassBuilder = ClassBuilder
+                .CreateFor<ToggleButton>(null)
+                .DefineClass(@class => @class.NoPrefix().Name("editor-toolbar-item"))
+                .DefineClass(@class => @class.NoPrefix().Name("toolbar-button"))
+                .DefineClass(@class => @class.NoPrefix().Name("toggled").Condition(component => component.IsToggled))
+                .DefineClass(@class => @class.NoPrefix().Name("disabled").Condition(component => component.IsDisabled()));
         }
-
-        /*Task IMessageHandler<CommandMessage>.HandleAsync(CommandMessage message)
-        {
-            if (ReferenceEquals(message.Command, Command))
-            {
-                UpdateClassString();
-            }
-
-            return Task.CompletedTask;
-        }*/
 
         Task IMessageHandler<ToggleButtonMessage>.HandleAsync(ToggleButtonMessage message)
         {
@@ -177,21 +112,12 @@ namespace LibraProgramming.BlazEdit.Components
             return Task.CompletedTask;
         }
 
-        void IObserver<IToolCommand>.OnCompleted()
-        {
-            commanDisposable = null;
-        }
-
-        void IObserver<IToolCommand>.OnError(Exception error)
-        {
-            ;
-        }
-
-        void IObserver<IToolCommand>.OnNext(IToolCommand value)
+        private void OnCommandUpdated(IToolCommand value)
         {
             if (ReferenceEquals(value, Command))
             {
                 IsToggled = Command.IsApplied;
+                Debug.WriteLine($"Toggle button IsToggled: {IsToggled}");
             }
         }
 
@@ -199,7 +125,7 @@ namespace LibraProgramming.BlazEdit.Components
         {
             base.OnInitialized();
 
-            subscription = MessageDispatcher.Subscribe(this);
+            subscriptions.Add(MessageDispatcher.Subscribe(this));
 
             UpdateState();
         }
@@ -209,7 +135,7 @@ namespace LibraProgramming.BlazEdit.Components
             base.BuildRenderTree(builder);
 
             builder.OpenElement(1, "button");
-            builder.AddAttribute(2, "class", classString);
+            builder.AddAttribute(2, "class", ClassString);
             builder.AddAttribute(3, "type", "button");
             builder.AddAttribute(4, "role", "button");
 
@@ -220,72 +146,30 @@ namespace LibraProgramming.BlazEdit.Components
             }
 
             builder.AddAttribute(7, "disabled", IsDisabled());
-            builder.AddAttribute(8, "onclick", clickCallback);
+            builder.AddAttribute(8, "onclick", ClickCallback);
 
             builder.AddContent(9, ChildContent);
 
             builder.CloseElement();
         }
 
-        protected override void OnAfterRender(bool firstRender)
-        {
-            base.OnAfterRender(firstRender);
-
-            if (firstRender)
-            {
-                Debug.WriteLine("OnAfterRender");
-                hasRendered = true;
-            }
-        }
-
-        protected override void OnParametersSet()
-        {
-            base.OnParametersSet();
-        }
-
         protected override void OnDispose()
         {
-            subscription.Dispose();
+            subscriptions.Dispose();
         }
 
-        private void UpdateState()
+        protected override async Task DoClickAsync(MouseEventArgs e)
         {
-            classString = classBuilder.Build(this);
+            var actor = Command;
 
-            Debug.WriteLine($"Class string: {classString}");
-
-            if (hasRendered)
+            if (null != actor && actor.CanInvoke())
             {
-                Debug.WriteLine("StateHasRendered");
-                StateHasChanged();
+                await actor.InvokeAsync();
             }
+
+            await base.DoClickAsync(e);
         }
 
-        private async Task DoClickAsync(MouseEventArgs e)
-        {
-            var action = Command;
-
-            if (null != action && action.CanInvoke())
-            {
-                await action.InvokeAsync();
-            }
-
-            await OnClick.InvokeAsync(e);
-        }
-
-        private bool IsDisabled()
-        {
-            if (false == Enabled)
-            {
-                return true;
-            }
-
-            if (null != Command)
-            {
-                return false == Command.CanInvoke();
-            }
-
-            return false;
-        }
+        protected override bool IsDisabled() => base.IsDisabled() || (null != Command && false == Command.CanInvoke());
     }
 }

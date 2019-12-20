@@ -1,64 +1,46 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using LibraProgramming.BlazEdit.Core.Interop;
 
 namespace LibraProgramming.BlazEdit.Core
 {
-    public class Selection
+    public class Selection : IEnumerable<SelectionRange>
     {
-        private static readonly StringComparer comparer;
-
         public static readonly Selection Empty;
-        
-        private readonly SelectionChangeAction action;
+
         private readonly SelectionRange[] ranges;
 
-        public Selection(SelectionChangeAction action, SelectionRange range)
+        public int Count => ranges.Length;
+
+        public bool IsEmpty
         {
-            this.action = action;
-            ranges = null != range ? new[] {range} : Array.Empty<SelectionRange>();
+            get
+            {
+                if (ReferenceEquals(this, Empty))
+                {
+                    return true;
+                }
+
+                return 0 == ranges.Length;
+            }
         }
 
-        private Selection(SelectionChangeAction action, SelectionRange[] ranges)
+        public SelectionRange this[int index] => ranges[index];
+
+        public Selection(SelectionRange range)
+            : this(null != range ? new[] {range} : null)
         {
-            this.action = action;
+        }
+
+        public Selection(SelectionRange[] ranges)
+        {
             this.ranges = ranges ?? Array.Empty<SelectionRange>();
         }
 
         static Selection()
         {
-            comparer = StringComparer.InvariantCultureIgnoreCase;
             Empty = new EmptySelection();
-        }
-
-        public bool HasNode(string nodeName)
-        {
-            for (var index = 0; index < ranges.Length; index++)
-            {
-                if (RangeHasNode(ranges[index], nodeName))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool RangeHasNode(SelectionRange range, string nodeName)
-        {
-            for (var current = range.Start; null != current; current = current.NextNode)
-            {
-                if (comparer.Equals(current.Name, nodeName))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static Selection From(SelectionEventArgs e)
-        {
-            return new Selection(e.Action, e.Ranges);
         }
 
         public string GetSelectionText()
@@ -66,10 +48,23 @@ namespace LibraProgramming.BlazEdit.Core
             return "";
         }
 
+        public IEnumerator<SelectionRange> GetEnumerator()
+        {
+            for (var index = 0; index < ranges.Length; index++)
+            {
+                yield return ranges[index];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => ranges.GetEnumerator();
+
+        /// <summary>
+        /// 
+        /// </summary>
         private class EmptySelection : Selection
         {
             public EmptySelection()
-                : base(SelectionChangeAction.SelectionStart, (SelectionRange) null)
+                : base((SelectionRange) null)
             {
             }
         }

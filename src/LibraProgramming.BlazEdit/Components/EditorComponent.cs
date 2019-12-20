@@ -1,24 +1,26 @@
 ﻿using LibraProgramming.BlazEdit.Commands;
 using LibraProgramming.BlazEdit.Core;
 using LibraProgramming.BlazEdit.Events;
-using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
+using System.Diagnostics;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Components
 {
-    public class EditorComponent : ComponentBase, IEditorContext, IMessageHandler<SelectionChangedMessage>, IDisposable
+    public class EditorComponent : ComponentBase, IEditorContext, IDisposable
     {
         private readonly string generatedElementId;
-        private readonly BoldToolCommand boldCommand;
-        private readonly ItalicToolCommand italicCommand;
+        private FormatCommand boldCommand;
+        private FormatCommand italicCommand;
         private IEditorJSInterop editor;
         private ITimeout timeout;
         private bool hasRendered;
-        private IDisposable disposable;
+        private readonly CompositeDisposable subscriptions;
         private bool initialized;
+        private Selection selection;
         private int id;
 
         [Inject]
@@ -56,15 +58,49 @@ namespace LibraProgramming.BlazEdit.Components
             set;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        protected FormatToolCommand BoldCommand => boldCommand;
+        public Selection Selection
+        {
+            get => selection;
+            private set
+            {
+                selection = value;
+                MessageDispatcher.Publish(new SelectionChangedMessage());
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        protected FormatToolCommand ItalicCommand => italicCommand;
+        protected FormatCommand BoldCommand
+        {
+            get
+            {
+                if (null == boldCommand)
+                {
+                    boldCommand = new FormatCommand(this, "STRONG");
+                    subscriptions.Add(MessageDispatcher.Subscribe(boldCommand));
+                }
+
+                return boldCommand;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected FormatCommand ItalicCommand
+        {
+            get
+            {
+                if (null == italicCommand)
+                {
+                    italicCommand = new FormatCommand(this, "EM");
+                    subscriptions.Add(MessageDispatcher.Subscribe(italicCommand));
+                }
+
+                return italicCommand;
+            }
+        }
 
         protected object[] Paragraphs
         {
@@ -76,9 +112,8 @@ namespace LibraProgramming.BlazEdit.Components
         protected EditorComponent()
         {
             generatedElementId = $"__editor_area_{IdManager<EditorComponent>.GetId(ref id)}";
-
-            boldCommand = new BoldToolCommand(this);
-            italicCommand = new ItalicToolCommand(this);
+            subscriptions = new CompositeDisposable(4);
+            selection = Selection.Empty;
 
             Paragraphs = new []
             {
@@ -91,12 +126,7 @@ namespace LibraProgramming.BlazEdit.Components
 
         public void Dispose()
         {
-            disposable.Dispose();
-        }
-
-        Task IMessageHandler<SelectionChangedMessage>.HandleAsync(SelectionChangedMessage message)
-        {
-            return Task.CompletedTask;
+            subscriptions.Dispose();
         }
 
         ValueTask IEditorContext.FormatSelectionAsync(SelectionFormat format) => editor.FormatSelectionAsync(format);
@@ -107,21 +137,7 @@ namespace LibraProgramming.BlazEdit.Components
 
             var editorInterop = new EditorJsInterop(JsRuntime, EditorElementId);
 
-            disposable = new CompositeDisposable(
-                editorInterop.Subscribe(SelectionObserver.Create(
-                    e =>
-                    {
-                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.From(e)));
-                    },
-                    e =>
-                    {
-                        MessageDispatcher.Publish(new SelectionChangedMessage(Selection.From(e)));
-                    })
-                ),
-                MessageDispatcher.Subscribe(this),
-                MessageDispatcher.Subscribe(boldCommand),
-                MessageDispatcher.Subscribe(italicCommand)
-            );
+            subscriptions.Add(editorInterop.Subscribe(value => Selection = value));
 
             editor = editorInterop;
         }

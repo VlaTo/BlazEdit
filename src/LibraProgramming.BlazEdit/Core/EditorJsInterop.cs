@@ -1,8 +1,7 @@
-using LibraProgramming.BlazEdit.Components;
 using LibraProgramming.BlazEdit.Core.Interop;
-using LibraProgramming.BlazEdit.TinyRx;
 using Microsoft.JSInterop;
 using System;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 namespace LibraProgramming.BlazEdit.Core
@@ -10,38 +9,11 @@ namespace LibraProgramming.BlazEdit.Core
     /// <summary>
     /// 
     /// </summary>
-    public class EditorJsInterop : ObservableBase<ISelectionObserver>, IEditorJSInterop
+    public class EditorJsInterop : IObservable<Selection>, IEditorJSInterop
     {
         private readonly IJSRuntime jsRuntime;
         private readonly string elementId;
-
-/*
-        public event EventHandler<SelectionStartEventArgs> SelectionStart
-        {
-            add
-            {
-                if (null == selectionStartHandler)
-                {
-                    var instance = DotNetObjectReference.Create(this);
-                    Debug.WriteLine("EditorJsInterop.SelectionStart subscribe listener");
-                    jsRuntime.InvokeVoidAsync("editor.addSelectionStartListener", instance).RunAndForget();
-                }
-
-                Debug.WriteLine("EditorJsInterop.SelectionStart add event handler");
-
-                selectionStartHandler += value;
-            }
-            remove
-            {
-                selectionStartHandler -= value;
-
-                if (null == selectionStartHandler)
-                {
-                    jsRuntime.InvokeVoidAsync("editor.removeSelectionStartListener").RunAndForget();
-                }
-            }
-        }
-*/
+        private readonly Subject<Selection> subject;
 
         public EditorJsInterop(IJSRuntime jsRuntime, string elementId)
         {
@@ -52,6 +24,8 @@ namespace LibraProgramming.BlazEdit.Core
 
             this.jsRuntime = jsRuntime;
             this.elementId = elementId;
+
+            subject = new Subject<Selection>();
         }
 
         public async ValueTask InitializeEditorAsync()
@@ -69,9 +43,10 @@ namespace LibraProgramming.BlazEdit.Core
         [JSInvokable]
         public ValueTask OnSelectionChange(SelectionChangeAction action, SelectionRange[] ranges)
         {
-            var eventArgs = new SelectionEventArgs(action, ranges);
-            Raise(observer => observer.OnSelectionChange(eventArgs));
+            subject.OnNext(new Selection(ranges));
             return new ValueTask(Task.CompletedTask);
         }
+
+        public IDisposable Subscribe(IObserver<Selection> observer) => subject.Subscribe(observer);
     }
 }

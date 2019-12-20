@@ -13,19 +13,11 @@ namespace LibraProgramming.BlazEdit.Components
     /// <summary>
     /// 
     /// </summary>
-    public class ToolButton : ToolComponent, IMessageHandler<CommandMessage>
+    public sealed class ToolButton : ToolButtonBase, IMessageHandler<CommandMessage>, IToolButton
     {
-        private static readonly ClassBuilder<ToolButton> classBuilder;
-        private readonly EventCallback<MouseEventArgs> clickCallback;
-        private bool hasRendered;
+        private static readonly ClassBuilder<ToolButton> ButtonClassBuilder;
         private IDisposable subscription;
 
-        [Parameter]
-        public bool Enabled
-        {
-            get; 
-            set;
-        }
 
         [Parameter]
         public IToolCommand Command
@@ -34,69 +26,25 @@ namespace LibraProgramming.BlazEdit.Components
             set;
         }
 
-        [Parameter]
-        public string Tooltip
+        public ToolButton() 
+            : base(ButtonClassBuilder)
         {
-            get; 
-            set;
-        }
-
-        [Inject]
-        public IMessageDispatcher MessageDispatcher
-        {
-            get; 
-            set;
-        }
-
-        [Parameter]
-        public RenderFragment ChildContent
-        {
-            get; 
-            set;
-        }
-
-        [Parameter]
-        public EventCallback<MouseEventArgs> OnClick
-        {
-            get; 
-            set;
-        }
-
-        protected string ClassString
-        {
-            get; 
-            private set;
-        }
-
-        public ToolButton()
-        {
-            clickCallback = EventCallback.Factory.Create<MouseEventArgs>(this, DoClickAsync);
-            Enabled = true;
         }
 
         static ToolButton()
         {
-            classBuilder = ClassBuilder.CreateFor<ToolButton>(null)
-                .DefineClass(@class => @class
-                    .Name("editor-toolbar-item")
-                    .NoPrefix()
-                )
-                .DefineClass(@class => @class
-                    .Name("toolbar-button")
-                    .NoPrefix()
-                )
-                .DefineClass(@class => @class
-                    .Name("disabled")
-                    .NoPrefix()
-                    .Condition(component => component.IsDisabled())
-                );
+            ButtonClassBuilder = ClassBuilder
+                .CreateFor<ToolButton>(null)
+                .DefineClass(@class => @class.NoPrefix().Name("editor-toolbar-item"))
+                .DefineClass(@class => @class.NoPrefix().Name("toolbar-button"))
+                .DefineClass(@class => @class.NoPrefix().Name("disabled").Condition(component => component.IsDisabled()));
         }
 
         Task IMessageHandler<CommandMessage>.HandleAsync(CommandMessage message)
         {
             if (ReferenceEquals(message.Command, Command))
             {
-                UpdateClassString();
+                UpdateState();
             }
 
             return Task.CompletedTask;
@@ -105,10 +53,7 @@ namespace LibraProgramming.BlazEdit.Components
         protected override void OnInitialized()
         {
             base.OnInitialized();
-
             subscription = MessageDispatcher.Subscribe(this);
-
-            UpdateClassString();
         }
 
         protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -127,44 +72,16 @@ namespace LibraProgramming.BlazEdit.Components
             }
 
             builder.AddAttribute(7, "disabled", IsDisabled());
-            builder.AddAttribute(8, "onclick", clickCallback);
+            builder.AddAttribute(8, "onclick", ClickCallback);
 
             builder.AddContent(9, ChildContent);
 
             builder.CloseElement();
         }
 
-        protected override void OnAfterRender(bool firstRender)
-        {
-            base.OnAfterRender(firstRender);
+        protected override void OnDispose() => subscription.Dispose();
 
-            if (firstRender)
-            {
-                hasRendered = true;
-            }
-        }
-
-        protected override void OnParametersSet()
-        {
-            base.OnParametersSet();
-        }
-
-        protected override void OnDispose()
-        {
-            subscription.Dispose();
-        }
-
-        private void UpdateClassString()
-        {
-            ClassString = classBuilder.Build(this);
-
-            if (hasRendered)
-            {
-                StateHasChanged();
-            }
-        }
-
-        private async Task DoClickAsync(MouseEventArgs e)
+        protected override async Task DoClickAsync(MouseEventArgs e)
         {
             var command = Command;
 
@@ -173,22 +90,9 @@ namespace LibraProgramming.BlazEdit.Components
                 await command.InvokeAsync();
             }
 
-            await OnClick.InvokeAsync(e);
+            await base.DoClickAsync(e);
         }
 
-        private bool IsDisabled()
-        {
-            if (false == Enabled)
-            {
-                return true;
-            }
-
-            if (null != Command)
-            {
-                return false == Command.CanInvoke();
-            }
-
-            return false;
-        }
+        protected override bool IsDisabled() => base.IsDisabled() || (null != Command && false == Command.CanInvoke());
     }
 }

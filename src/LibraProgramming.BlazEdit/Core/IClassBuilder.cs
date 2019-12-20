@@ -7,7 +7,7 @@ namespace LibraProgramming.BlazEdit.Core
     /// 
     /// </summary>
     /// <typeparam name="TComponent"></typeparam>
-    internal interface IClassBuilder<out TComponent>
+    public interface IClassBuilder<out TComponent>
         where TComponent : ToolComponent
     {
         /// <summary>

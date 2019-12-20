@@ -1,5 +1,8 @@
-﻿namespace LibraProgramming.BlazEdit.Core.Interop
+﻿using System;
+
+namespace LibraProgramming.BlazEdit.Core.Interop
 {
+    [Serializable]
     public class SelectionNode
     {
         public string Name
@@ -15,6 +18,7 @@
         }
     }
 
+    [Serializable]
     public class SelectionRange
     {
         public SelectionNode Start

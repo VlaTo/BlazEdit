@@ -6,20 +6,22 @@ using LibraProgramming.BlazEdit.Components;
 
 namespace LibraProgramming.BlazEdit.Core
 {
-    internal static class ClassBuilder
+    public abstract class ClassBuilder
     {
         public static ClassBuilder<TComponent> CreateFor<TComponent>(string classNamePrefix, string componentPrefix = null)
             where TComponent : ToolComponent
         {
             return new ClassBuilder<TComponent>(classNamePrefix, componentPrefix);
         }
+
+        public abstract string Build(ToolComponent component, string extras = "", bool addClassNamePrefix = true);
     }
 
     /// <summary>
     /// 
     /// </summary>
     /// <typeparam name="TComponent"></typeparam>
-    internal class ClassBuilder<TComponent>
+    public class ClassBuilder<TComponent> : ClassBuilder
         where TComponent : ToolComponent
     {
         private const char ClassNameSeparator = ' ';
@@ -47,6 +49,11 @@ namespace LibraProgramming.BlazEdit.Core
                     throw new ArgumentException("", nameof(classNamePrefix));
                 }
             }
+        }
+
+        public override string Build(ToolComponent component, string extras = "", bool addClassNamePrefix = true)
+        {
+            return Build((TComponent) component, extras, addClassNamePrefix);
         }
 
         public string Build(TComponent component, string extras = "", bool addClassNamePrefix = true)
@@ -139,30 +146,15 @@ namespace LibraProgramming.BlazEdit.Core
         /// </summary>
         private class ClassDefinition
         {
-            public string Prefix
-            {
-                get;
-            }
+            public string Prefix { get; }
 
-            public Func<TComponent, string> Accessor
-            {
-                get;
-            }
+            public Func<TComponent, string> Accessor { get; }
 
-            public IReadOnlyList<ClassModifier> Modifiers
-            {
-                get;
-            }
+            public IReadOnlyList<ClassModifier> Modifiers { get; }
 
-            public Predicate<TComponent> Condition
-            {
-                get;
-            }
+            public Predicate<TComponent> Condition { get; }
 
-            public string PrefixSeparator
-            {
-                get;
-            }
+            public string PrefixSeparator { get; }
 
             public ClassDefinition(
                 string prefix,
@@ -184,15 +176,9 @@ namespace LibraProgramming.BlazEdit.Core
         /// </summary>
         private class ClassModifier
         {
-            public Func<TComponent, string> Accessor
-            {
-                get;
-            }
+            public Func<TComponent, string> Accessor { get; }
 
-            public Predicate<TComponent> Condition
-            {
-                get;
-            }
+            public Predicate<TComponent> Condition { get; }
 
             public ClassModifier(Func<TComponent, string> accessor, Predicate<TComponent> condition)
             {
