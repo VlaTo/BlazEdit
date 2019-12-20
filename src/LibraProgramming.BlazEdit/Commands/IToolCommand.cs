@@ -7,6 +7,11 @@ namespace LibraProgramming.BlazEdit.Commands
     /// </summary>
     public interface IToolCommand
     {
+        string Id
+        {
+            get;
+        }
+
         /// <summary>
         /// 
         /// </summary>

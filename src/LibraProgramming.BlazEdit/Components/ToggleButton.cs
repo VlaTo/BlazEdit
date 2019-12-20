@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using System;
-using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 
@@ -64,7 +63,7 @@ namespace LibraProgramming.BlazEdit.Components
 
                 toggled = value;
 
-                if (toggled)
+                if (toggled && false == String.IsNullOrEmpty(GroupName))
                 {
                     MessageDispatcher.Publish(new ToggleButtonMessage(this));
                 }
@@ -114,11 +113,7 @@ namespace LibraProgramming.BlazEdit.Components
 
         private void OnCommandUpdated(IToolCommand value)
         {
-            if (ReferenceEquals(value, Command))
-            {
-                IsToggled = Command.IsApplied;
-                Debug.WriteLine($"Toggle button IsToggled: {IsToggled}");
-            }
+            IsToggled = Command.IsApplied;
         }
 
         protected override void OnInitialized()

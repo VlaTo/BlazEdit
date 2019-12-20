@@ -13,6 +13,8 @@ namespace LibraProgramming.BlazEdit.Commands
         private readonly Subject<IToolCommand> subject;
         private bool applied;
 
+        public string Id => CheckNodeName;
+
         public virtual bool IsApplied
         {
             get => applied;

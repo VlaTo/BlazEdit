@@ -9,6 +9,12 @@ namespace LibraProgramming.BlazEdit.Commands
     /// </summary>
     internal abstract class ToolCommandBase : IToolCommand
     {
+        public abstract string Id
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// 
         /// </summary>

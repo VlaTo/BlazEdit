@@ -24,7 +24,7 @@ namespace LibraProgramming.BlazEdit.Core.Extensions
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return FindNodeInternal(selection, "STRONG");
+            return FindNodeInternal(selection, name);
         }
 
         private static SelectionNode FindNodeInternal(Selection selection, string name)

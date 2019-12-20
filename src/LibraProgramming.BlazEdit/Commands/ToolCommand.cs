@@ -8,6 +8,12 @@ namespace LibraProgramming.BlazEdit.Commands
     /// </summary>
     internal sealed class ToolCommand : ToolCommandBase
     {
+        public override string Id
+        {
+            get; 
+            set;
+        }
+
         /// <summary>
         /// 
         /// </summary>

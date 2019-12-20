@@ -4,7 +4,6 @@ using LibraProgramming.BlazEdit.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
-using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 
@@ -15,6 +14,7 @@ namespace LibraProgramming.BlazEdit.Components
         private readonly string generatedElementId;
         private FormatCommand boldCommand;
         private FormatCommand italicCommand;
+        private FormatCommand strikeThroughCommand;
         private IEditorJSInterop editor;
         private ITimeout timeout;
         private bool hasRendered;
@@ -99,6 +99,23 @@ namespace LibraProgramming.BlazEdit.Components
                 }
 
                 return italicCommand;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected FormatCommand StrikeThroughCommand
+        {
+            get
+            {
+                if (null == strikeThroughCommand)
+                {
+                    strikeThroughCommand = new FormatCommand(this, "STRIKE");
+                    subscriptions.Add(MessageDispatcher.Subscribe(strikeThroughCommand));
+                }
+
+                return strikeThroughCommand;
             }
         }
 
