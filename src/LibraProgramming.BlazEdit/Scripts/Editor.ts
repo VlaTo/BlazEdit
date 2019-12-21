@@ -44,17 +44,25 @@ class Editor implements IEditor {
 
         this.contentDocument.addEventListener("selectstart", onSelectionStart);
         this.contentDocument.addEventListener("selectionchange", onSelectionChange);
+
+        this.contentDocument.body.setAttribute("id", "blazedit");
         this.contentDocument.body.setAttribute("contenteditable", "true");
+        this.contentDocument.body.setAttribute("spellcheck", "false");
+        this.contentDocument.body.setAttribute("class", "editor-content-body");
+    }
 
-        let link = this.contentDocument.createElement("link");
+    /**
+     * @func setContentStyles
+     * @param {string} styles
+     *
+     */
+    setContentStyles(styles: string): void {
+        const style: HTMLStyleElement = this.contentDocument.createElement("style");
 
-        link.rel = "stylesheet";
-        link.type = "text/css";
-        link.crossOrigin = "anonymous";
-        link.referrerPolicy = "origin";
-        link.href = "_content/LibraProgramming.BlazEdit/content.css";
+        style.type = "text/css";
+        style.innerText = styles;
 
-        this.contentDocument.head.append(link);
+        this.contentDocument.head.append(style);
     }
     
     /**

@@ -9,6 +9,8 @@ namespace LibraProgramming.BlazEdit.Core
     {
         ValueTask InitializeEditorAsync();
 
+        ValueTask SetContentStylesAsync(string styles);
+
         ValueTask<string> GetContentAsync();
 
         ValueTask SetContentAsync(string content);

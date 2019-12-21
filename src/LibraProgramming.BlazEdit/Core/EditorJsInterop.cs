@@ -34,6 +34,8 @@ namespace LibraProgramming.BlazEdit.Core
             await jsRuntime.InvokeVoidAsync("editor", elementId, callback);
         }
 
+        public ValueTask SetContentStylesAsync(string styles) => jsRuntime.InvokeVoidAsync("editor.setContentStyles", styles);
+
         public ValueTask<string> GetContentAsync() => jsRuntime.InvokeAsync<string>("editor.getContent");
 
         public ValueTask SetContentAsync(string content) => jsRuntime.InvokeVoidAsync("editor.setContent", content);

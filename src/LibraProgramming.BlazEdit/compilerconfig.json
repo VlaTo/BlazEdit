@@ -3,7 +3,7 @@
     "outputFile": "wwwroot/editor.css",
     "inputFile": "Styles/Editor.less",
     "minify": {
-      "enabled": false
+      "enabled": true
     },
     "options": {
       "sourceMap": false
@@ -13,7 +13,7 @@
     "outputFile": "wwwroot/content.css",
     "inputFile": "Styles/Content.less",
     "minify": {
-      "enabled": false
+      "enabled": true
     },
     "options": {
       "sourceMap": false

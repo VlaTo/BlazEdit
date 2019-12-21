@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
 using System.Reactive.Disposables;
+using System.Threading;
 using System.Threading.Tasks;
+using LibraProgramming.BlazEdit.Extensions;
 
 namespace LibraProgramming.BlazEdit.Components
 {
@@ -19,9 +21,10 @@ namespace LibraProgramming.BlazEdit.Components
         private ITimeout timeout;
         private bool hasRendered;
         private readonly CompositeDisposable subscriptions;
-        private bool initialized;
+        private int initialized;
         private Selection selection;
         private int id;
+        private string text;
 
         [Inject]
         public IJSRuntime JsRuntime
@@ -47,8 +50,18 @@ namespace LibraProgramming.BlazEdit.Components
         [Parameter]
         public string Text
         {
-            get; 
-            set;
+            get => text;
+            set
+            {
+                if (String.Equals(text, value))
+                {
+                    return;
+                }
+
+                text = value;
+
+                TextChanged.InvokeAsync(value).RunAndForget();
+            }
         }
 
         [Parameter]
@@ -183,14 +196,21 @@ namespace LibraProgramming.BlazEdit.Components
         // https://github.com/cloudcrate/BlazorStorage/blob/master/src/Storage.cs
         private async Task EnsureInitializedAsync()
         {
-            if (initialized)
+            if (0 == Interlocked.CompareExchange(ref initialized, 1, 0))
             {
-                return ;
+                var styles = "@font-face{" +
+                             "font-family:\"avenir\"; " +
+                             "src: url(\"/static/AvenirHeavy-9de46e344e47c7432887c85c9583aafe.woff\") format(\"woff\"), " +
+                             "url(\"/static/AvenirHeavy-289fbfeed5013eb4bb1638deea01cc65.woff2\") format(\"woff2\"); " +
+                             "font-style:normal; " +
+                             "font-weight:600; " +
+                             "font-display:swap; " +
+                             "} " +
+                             "#blazedit.editor-content-body{font-family:avenir,arial,helvetica,sans-serif!important; color:#626262;}"
+                    ;
+                await editor.InitializeEditorAsync();
+                await editor.SetContentStylesAsync(styles);
             }
-
-            initialized = true;
-
-            await editor.InitializeEditorAsync();
         }
 
         private async Task DoAssignContent()
