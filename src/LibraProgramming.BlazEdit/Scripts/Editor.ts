@@ -78,6 +78,8 @@ class Editor implements IEditor {
                 const range = selection.getRangeAt(index);
                 const element = this.contentDocument.createElement(format.elementName);
 
+
+
                 range.surroundContents(element);
             }
         } else {
